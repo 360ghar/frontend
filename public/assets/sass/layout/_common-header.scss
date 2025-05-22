@@ -1,0 +1,50 @@
+/* ==================== Common Header Css Start ======================== */
+.dark-header {
+    background-color: var(--gray-900);
+    &.has-border {
+        border-bottom: 1px solid hsl(var(--white)/.1);
+    }
+    &.fixed-header {
+        background-color: var(--gray-700) !important;
+    }
+    .toggle-mobileMenu  {
+        color: hsl(var(--white));
+    }
+    
+    .nav-menu {
+        &__link {
+            color: hsl(var(--white));
+        }   
+    }
+    
+    .has-submenu {
+        > a::before {
+            color: hsl(var(--white));
+            opacity: .4;
+        }
+    }
+    
+    .nav-submenu {
+        background-color: var(--gray-700);
+        &__item {
+            &::before {
+                color: hsl(var(--white));
+            }
+            &:hover {
+                background-color: hsl(var(--white)/.1);
+                a {
+                    color: hsl(var(--white));
+                }
+            }
+        }
+        &__link {
+            color: hsl(var(--white));
+        }
+    }
+}
+
+.menu-right {
+    margin-left: auto;
+    margin-right: clampCal(20, 62);
+}
+/* ==================== Common Header Css End ======================== */

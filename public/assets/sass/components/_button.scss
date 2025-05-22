@@ -1,0 +1,158 @@
+/* ================================= Button Css Start =========================== */
+.btn-check:checked+.btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check)+.btn:active {
+    color: none;
+    background-color: none;
+    border-color: none;
+}
+
+.btn {
+    position: relative;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    font-weight: 500;
+    font-family: var(--body-font);
+    color: hsl(var(--white)) !important;
+    z-index: 1;
+    @include font-14; 
+    line-height: 1;
+    text-transform: uppercase;
+    padding: 22px 30px;
+    @include md-screen {
+        padding: 17px 20px; 
+    }
+    @include sm-screen {
+        padding: 14px 20px; 
+    }
+    &:hover, &:focus, &:focus-visible {
+        box-shadow: none !important;
+    }
+    &-sm {
+        padding: 12px !important;
+        @include font-11; 
+        .icon-right {
+            font-size: 12px !important;
+            margin-left: 4px !important;
+        }
+    }
+    &-icon {
+        width: 44px;
+        height: 44px;
+        background-color: hsl(var(--white)) !important;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: .2s linear;
+        border: 0;
+        @include font-20; 
+        &:hover {
+            transform: scale(1.04);
+        }
+    }
+    .icon-right {
+        margin-left: 10px;
+        @include font-16; 
+    }
+    .icon-left {
+        margin-right: 10px;
+        @include font-16; 
+    }
+    &:active {
+        transform: scale(1.014);
+    }
+    // ============= Different Color Button Start ==================
+    &-main {
+        background-color: transparent !important;
+        border-color: hsl(var(--main)) !important;
+        &::before, &::after {
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            background: var(--main-gradient);
+            transition: 0.2s linear;
+        }
+        &::after {
+            background: var(--main-gradient-rev);
+            visibility: hidden;
+            opacity: 0;
+        }
+        &:hover, &:focus, &:focus-visible {
+            &::after {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+    }
+    &-outline-main {
+        overflow: hidden;
+        color: hsl(var(--heading-color)) !important;
+        z-index: 1;
+        &::before, &::after {
+            position: absolute;
+            content: "";
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            background: var(--main-gradient);
+            transition: 0.2s linear;
+            border-radius: inherit;
+        }
+        &::after {
+            background: hsl(var(--body-bg));
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            left: 1px;
+            top: 1px;
+        }
+        &:hover, &:focus, &:focus-visible {
+            color: hsl(var(--white)) !important;
+            &::after {
+                visibility: hidden;
+                opacity: 0;
+            }
+        }
+        &-dark {
+            color: hsl(var(--white)) !important; 
+            &::after {
+                background-color: var(--gray-900);
+            }
+        }
+        &-white {
+            color: hsl(var(--heading-color)) !important; 
+            &::after {
+                background-color: hsl(var(--white));
+            }
+        }
+    }
+    &.bg-white {
+        &::after {
+            background: hsl(var(--white));
+        }
+    }
+    &-outline-light {
+        background-color: transparent !important;
+        border: 1px solid var(--border-color) !important;
+        color: hsl(var(--heading-color)) !important;
+        &:hover, &:focus &:focus-visible {
+            background-color: var(--gray-200) !important;
+        }
+    }
+    &-outline-lightInDark {
+        background-color: transparent !important;
+        border: 1px solid hsl(var(--white)/.4) !important;
+        color: hsl(var(--white)) !important;
+        &:hover, &:focus &:focus-visible {
+            background-color: var(--gray-200) !important;
+            color: hsl(var(--heading-color)) !important;
+        }
+    }
+}
+
+/* ================================= Button Css End =========================== */

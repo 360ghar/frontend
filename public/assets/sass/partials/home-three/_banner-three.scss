@@ -1,0 +1,53 @@
+/* ========================== Banner Three Css Start ============================== */
+.banner-three {
+    z-index: 1;
+    position: relative;
+    &__dotted {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: -1;
+    }
+    &__shape {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        max-width: 14%;
+        z-index: -1;
+    }
+
+    .banner-thumb {
+        @media (min-width: 992px) {
+            top: auto;
+            bottom: 34px;
+            display: flex;
+            align-items: center;
+        }
+    }
+    .banner-content__title {
+        @media (min-width: 992px) and (max-width: 1199px) {
+            font-size: 52px;
+        }
+    }
+}
+.curve-shape {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    animation: animate 10s linear infinite;
+}
+
+@keyframes animate {
+    0% {
+        clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);  
+    }
+    50% {
+        clip-path: polygon(100% 0, 0 0, 0 100%, 100% 100%);
+    }
+    100% {
+        clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+    }
+}
+/* ========================== Banner Three Css End ============================== */

@@ -1,0 +1,75 @@
+/* ====================== Property Details Section Start ================= */
+.property-details {
+    &__thumb {
+        border-radius: 5px;
+        overflow: hidden;
+    }
+}
+
+.property-details-item {
+    padding: clampCal(16, 30);
+    background-color: var(--gray-100);
+    border-radius: 5px;
+    margin-bottom: clampCal(24, 40);
+    &:first-child {
+        margin-top: clampCal(24, 40);
+    }
+    &:last-child {
+        margin-bottom: 0;
+    }
+    &__title {
+        padding-bottom: clampCal(16, 20);
+        margin-bottom: clampCal(16, 30);
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+
+.amenities-content {
+    gap: clampCal(12, 20);
+    &__icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 5px;
+        background-color: hsl(var(--white));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @include sm-screen {
+            width: 40px;
+            height: 40px;
+        }
+        img {
+            max-width: 40px;
+            @include sm-screen {
+                max-width: 28px;
+            }
+        }
+    }
+    &__text {
+        margin-bottom: 4px;
+        font-size: clampCal(13, 18);
+    }
+    &__title {
+        @include sm-screen {
+            font-size: 0.8125rem !important;
+        }
+    }
+}
+
+.address-map {
+    margin-top: clampCal(16, 30);
+    iframe {
+        width: 100%;
+        height: 375px;
+        filter: grayscale(1);
+        border-radius: 5px;
+    }
+}
+
+.house-content {
+    img {
+        border-radius: 5px;
+    }
+}
+
+/* ====================== Property Details Section End ================= */

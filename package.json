@@ -1,0 +1,41 @@
+{
+  "name": "react-3-real-estate",
+  "homepage": "https://360ghar.com/",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emailjs/browser": "^4.3.3",
+    "axios": "^1.9.0",
+    "formik": "^2.4.5",
+    "react": "^18.2.0",
+    "react-countup": "^6.5.0",
+    "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-image-lightbox": "^5.1.4",
+    "react-router-dom": "^6.22.3",
+    "react-slick": "^0.30.2",
+    "react-tabs": "^6.0.2",
+    "react-toastify": "^10.0.5",
+    "react-visibility-sensor": "^5.1.1",
+    "sass": "^1.71.1",
+    "yup": "^1.4.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "vite": "^5.1.6"
+  }
+}

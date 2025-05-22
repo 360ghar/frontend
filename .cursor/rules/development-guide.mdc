@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Guide
+
+## Setup and Installation
+1. Install dependencies with `npm install`
+2. Start development server with `npm run dev`
+3. Build for production with `npm run build`
+
+## Project Patterns
+- Multiple homepage variations (Home One, Home Two, etc.)
+- Data-driven UI components with data stored in `src/data/`
+- Responsive design using SASS
+- Form handling with Formik and Yup validation
+
+## Key Files
+- [index.html](mdc:index.html) - Main HTML template
+- [vite.config.js](mdc:vite.config.js) - Vite configuration
+- [package.json](mdc:package.json) - Dependencies and scripts
+
+## Common Tasks
+- Adding a new page:
+  1. Create page component in `src/pages/`
+  2. Add data file in appropriate `src/data/` directory
+  3. Add route in the router configuration
+  4. Add styles in `public/assets/sass/partials/`
+
+- Modifying styles:
+  1. Find relevant SASS files in `public/assets/sass/`
+  2. Make changes to component-specific files or partials

@@ -1,0 +1,16 @@
+/* ========================== About Four Section Css Start ========================== */
+.about-four {
+    .about-four-thumb {
+        &::before {
+            display: none;
+        }
+    }
+    .project-content {
+        right: auto;
+        left: 32px;
+        &::before {
+            display: none;
+        }
+    }
+}
+/* ========================== About Four Section Css End ========================== */ 
