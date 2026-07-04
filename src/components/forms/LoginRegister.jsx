@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useAuthStore } from '../../store';
 import api from '../../services/api';
 import { authService } from '../../services/authService';
+import { mapSupabaseAuthError, UNVERIFIED_ACCOUNT_MESSAGE } from '../../lib/authErrors';
 import { getLastAuthMethod, AUTH_METHODS, maskIdentifier } from '../../services/lastAuthMethod';
 import { getRedirectPathForStage, fetchAuthStage } from '../../utils/authStage';
 import useWebOtp from '../../hooks/useWebOtp';
@@ -129,7 +130,7 @@ const RegisterFlow = ({titleText, btnText, showTermCondition, haveAccountText, h
             await authService.signInWithGoogle('/');
         } catch (err) {
             setGoogleLoading(false);
-            toast.error(err.message || t('forms:google.failed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:google.failed'), { theme: 'colored' });
         }
     };
 
@@ -216,7 +217,7 @@ const RegisterFlow = ({titleText, btnText, showTermCondition, haveAccountText, h
             resend.start();
             setStep('otp');
         } catch (err) {
-            toast.error(err.message || t('forms:otp.sendFailed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:otp.sendFailed'), { theme: 'colored' });
         } finally {
             setBusy(false);
         }
@@ -234,7 +235,7 @@ const RegisterFlow = ({titleText, btnText, showTermCondition, haveAccountText, h
             }
             resend.start();
         } catch (err) {
-            toast.error(err.message || t('forms:otp.sendFailed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:otp.sendFailed'), { theme: 'colored' });
         } finally {
             setBusy(false);
         }
@@ -276,7 +277,7 @@ const RegisterFlow = ({titleText, btnText, showTermCondition, haveAccountText, h
             toast.success(t('forms:generic.registerSuccess'), { theme: 'colored' });
             navigate('/account');
         } catch (err) {
-            toast.error(err.message || t('forms:generic.registerFailed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:generic.registerFailed'), { theme: 'colored' });
         } finally {
             setBusy(false);
         }
@@ -640,7 +641,7 @@ const LoginFlow = ({
             // On success the browser redirects to Google; no further action here.
         } catch (err) {
             setGoogleLoading(false);
-            toast.error(err.message || t('forms:google.failed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:google.failed'), { theme: 'colored' });
         }
     };
 
@@ -751,6 +752,9 @@ const LoginFlow = ({
                 // (a signup). Existing-but-unverified accounts must not be re-created.
                 const shouldCreateUser = status?.exists !== true;
                 setOtpShouldCreateUser(shouldCreateUser);
+                if (status?.exists && status?.verified === false) {
+                    toast.info(UNVERIFIED_ACCOUNT_MESSAGE, { theme: 'colored' });
+                }
                 if (parsed.channel === 'email') {
                     await authService.sendEmailOtp(parsed.value, { shouldCreateUser });
                 } else {
@@ -760,7 +764,7 @@ const LoginFlow = ({
                 setStep('otp');
             }
         } catch (err) {
-            toast.error(err.message || t('forms:otp.sendFailed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:otp.sendFailed'), { theme: 'colored' });
         } finally {
             setBusy(false);
         }
@@ -835,7 +839,7 @@ const LoginFlow = ({
             }
             resend.start();
         } catch (err) {
-            toast.error(err.message || t('forms:otp.sendFailed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:otp.sendFailed'), { theme: 'colored' });
         } finally {
             setBusy(false);
         }
@@ -903,7 +907,7 @@ const LoginFlow = ({
             const stage = useAuthStore.getState().authStage || await fetchAuthStage(api);
             navigate(getRedirectPathForStage(stage));
         } catch (err) {
-            toast.error(err.message || t('forms:generic.loginFailed'), { theme: 'colored' });
+            toast.error(mapSupabaseAuthError(err) || t('forms:generic.loginFailed'), { theme: 'colored' });
         } finally {
             setBusy(false);
         }
