@@ -4,6 +4,11 @@ import { useI18nNavigate } from '../../i18n/I18nLink';
 import { I18nLink } from '../../i18n/I18nLink';
 import { toast } from 'react-toastify';
 import { authService } from '../../services/authService';
+import {
+    mapSupabaseAuthError,
+    NO_ACCOUNT_FOUND_MESSAGE,
+    IDENTIFIER_STATUS_UNAVAILABLE_MESSAGE,
+} from '../../lib/authErrors';
 import { useResendTimer } from '../../hooks/useResendTimer';
 import useWebOtp from '../../hooks/useWebOtp';
 import Header from '../../common/layout/Header';
@@ -62,11 +67,20 @@ const ForgotPassword = () => {
             setChannel('email');
             setIsLoading(true);
             try {
+                const status = await authService.checkIdentifierStatus(value);
+                if (!status) {
+                    setIdentifierError(IDENTIFIER_STATUS_UNAVAILABLE_MESSAGE);
+                    return;
+                }
+                if (!status.exists) {
+                    setIdentifierError(NO_ACCOUNT_FOUND_MESSAGE);
+                    return;
+                }
                 await authService.sendEmailOtp(value, { shouldCreateUser: false });
                 resend.start();
                 setStep('otp');
             } catch (error) {
-                toast.error(error.message || t('forgotPassword.errorMessage'));
+                toast.error(mapSupabaseAuthError(error) || t('forgotPassword.errorMessage'));
             } finally {
                 setIsLoading(false);
             }
@@ -80,11 +94,20 @@ const ForgotPassword = () => {
             setChannel('phone');
             setIsLoading(true);
             try {
+                const status = await authService.checkIdentifierStatus(`+91${phone}`);
+                if (!status) {
+                    setIdentifierError(IDENTIFIER_STATUS_UNAVAILABLE_MESSAGE);
+                    return;
+                }
+                if (!status.exists) {
+                    setIdentifierError(NO_ACCOUNT_FOUND_MESSAGE);
+                    return;
+                }
                 await authService.sendPhoneOtp(`+91${phone}`, { shouldCreateUser: false });
                 resend.start();
                 setStep('otp');
             } catch (error) {
-                toast.error(error.message || t('forgotPassword.errorMessage'));
+                toast.error(mapSupabaseAuthError(error) || t('forgotPassword.errorMessage'));
             } finally {
                 setIsLoading(false);
             }

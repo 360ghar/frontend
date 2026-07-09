@@ -35,7 +35,7 @@ export const deletionService = {
    * @returns {Promise<void>}
    */
   deleteAccountImmediate: async () => {
-    await api.post('/auth/delete-account');
+    await api.post('/auth/delete-account', { confirm: true });
   },
 
   /**

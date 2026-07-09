@@ -23,9 +23,16 @@ const AuthCallbackPage = () => {
     handledRef.current = true;
 
     const code = searchParams.get('code');
+    const oauthError = searchParams.get('error');
+    const oauthDescription = searchParams.get('error_description');
     const next = sanitizeNext(searchParams.get('next'));
 
     async function handleCallback() {
+      if (oauthError) {
+        const detail = oauthDescription || oauthError;
+        navigate(`/login?error=${encodeURIComponent(detail)}`, { replace: true });
+        return;
+      }
       if (!code) {
         navigate('/login?error=auth', { replace: true });
         return;
