@@ -35,7 +35,9 @@
        (homepage) one, appearing first, would win, making every page appear to
        canonicalize to "/". Canonical is owned per-page by the SEO component /
        Helmet (and baked into prerendered HTML). Junk shell URLs are handled by
-       the soft-404 edge function (real 404) rather than a default canonical. -->
+       netlify/edge-functions/soft-404-guard.js (fetch /404.html → HTTP 404 +
+       noindex; fail-open on any error so the SPA still serves if the edge
+       path throws). -->
 
   <!-- Google tag (gtag.js) — deferred to idle so it never competes with first paint -->
   <script>

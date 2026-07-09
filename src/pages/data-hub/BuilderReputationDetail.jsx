@@ -200,13 +200,28 @@ const BuilderReputationDetail = () => {
             address: builder?.city
               ? { '@type': 'PostalAddress', addressLocality: builder.city, addressRegion: 'Haryana', addressCountry: 'IN' }
               : undefined,
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: (score / 20).toFixed(1),
-              bestRating: '5',
-              worstRating: '1',
-              reviewCount: builder?.total_projects ?? 1,
-            },
+            // Do NOT emit AggregateRating from a 0–100 RERA-style score or
+            // project count — that fabricates review snippets (Google spam risk).
+            // Expose the score as structured PropertyValue instead.
+            additionalProperty: [
+              {
+                '@type': 'PropertyValue',
+                name: 'RERA reputation score',
+                value: score,
+                maxValue: 100,
+                unitText: 'points',
+              },
+              {
+                '@type': 'PropertyValue',
+                name: 'Registered projects',
+                value: builder?.total_projects ?? 0,
+              },
+              {
+                '@type': 'PropertyValue',
+                name: 'Complaints',
+                value: builder?.total_complaints ?? 0,
+              },
+            ],
             description: `${builderName} — RERA reputation score: ${score}/100. ${builder?.total_projects ?? 0} registered projects, ${builder?.total_complaints ?? 0} complaints.`,
           },
         ]}

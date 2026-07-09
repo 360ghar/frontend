@@ -11,6 +11,12 @@ import PageLoader from './PageLoader';
  * loop if the guard intervened. /profile-completion is the destination for
  * the profile-completion stage — redirecting to it from itself is a no-op.
  *
+ * /forgot-password and /reset-password: OTP verification creates a full
+ * Supabase session, then the user must finish setting a new password. If
+ * authStage is profile_completion, the guard would otherwise yank them off
+ * mid-reset. ForgotPassword sets sessionStorage.passwordResetFlow as a
+ * belt-and-suspenders signal (also honored below).
+ *
  * NOTE: /login and /register are intentionally NOT in this set. If a user
  * reaches them while already authenticated (e.g. the async login callback
  * didn't navigate, or they bookmarked /login), the guard should bounce them
@@ -20,7 +26,17 @@ const EXEMPT_CANONICAL_PATHS = new Set([
   '/profile-completion',
   '/auth/callback',
   '/add-phone',
+  '/forgot-password',
+  '/reset-password',
 ]);
+
+function isPasswordResetFlow() {
+  try {
+    return sessionStorage.getItem('passwordResetFlow') === '1';
+  } catch {
+    return false;
+  }
+}
 
 // Auth pages where an authenticated user should be redirected away from.
 // /register is intentionally excluded: the register flow creates a Supabase
@@ -60,8 +76,9 @@ const ProfileCompletionRouteGuard = () => {
 
     const canonical = stripLocalePrefix(pathname) || '/';
 
-    // Never redirect away from exempt routes.
-    if (EXEMPT_CANONICAL_PATHS.has(canonical)) return;
+    // Never redirect away from exempt routes, or during an active password-reset
+    // session (OTP already minted a session; user must finish /reset-password).
+    if (EXEMPT_CANONICAL_PATHS.has(canonical) || isPasswordResetFlow()) return;
 
     // 1. Profile-completion gate: redirect to /profile-completion.
     if (authStage === 'profile_completion') {
@@ -84,6 +101,7 @@ const ProfileCompletionRouteGuard = () => {
     !isInitializing &&
     isAuthenticated &&
     !EXEMPT_CANONICAL_PATHS.has(canonical) &&
+    !isPasswordResetFlow() &&
     (authStage === 'profile_completion' || AUTH_PAGE_PATHS.has(canonical));
 
   return redirecting ? <PageLoader /> : <Outlet />;

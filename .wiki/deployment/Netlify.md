@@ -158,7 +158,15 @@ covers: `api-catalog`, `openid-configuration`, `oauth-authorization-server`,
 
 ## Edge functions
 
-There is one edge function in `netlify/edge-functions/markdown-negotiation.js`.
+Netlify auto-discovers Deno edge functions under `netlify/edge-functions/`:
+
+| File | Purpose |
+|------|---------|
+| `markdown-negotiation.js` | Accept: text/markdown → HTML-to-Markdown transform |
+| `soft-404-guard.js` | Unknown SPA paths → real HTTP 404 + noindex (`/404.html`) |
+
+`netlify/edge-functions-disabled/` is a holding area for edge code that must
+not run (see its README). Never put active handlers there.
 
 ### Markdown content negotiation
 
@@ -177,6 +185,19 @@ Behaviour:
 - Response headers: `Content-Type: text/markdown; charset=utf-8`,
   `X-Markdown-Tokens` (rough token estimate, 1 token ≈ 4 chars),
   `Cache-Control: public, max-age=0, must-revalidate`, `Vary: Accept`.
+
+### Soft-404 guard
+
+Converts SPA soft-404s (`/* → /index.html 200`) into hard 404s for paths that
+match no valid route grammar.
+
+- **404 body:** `fetch('/404.html')` then `Response` with status 404 (do not
+  use `context.rewrite` — not documented; rewrites are status 200).
+- **Fail-open:** try/catch around the whole handler; on error, bare `return`
+  continues the chain (site stays up; soft-404 may return).
+- **Allow paths:** bare `return` (not `context.next()`) when the path is
+  valid or is a static passthrough.
+- **Verify:** `/` and `/properties` → 200; `/foo/bar` junk → 404 + noindex.
 - The HTML-to-Markdown transform is a hand-rolled rule list (headings,
   paragraphs, bold/italic, links, images, lists, code, blockquotes, tables).
   It is intentionally simple — do not extend it for rich content; update the
