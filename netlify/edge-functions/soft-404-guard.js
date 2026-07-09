@@ -85,6 +85,9 @@ const STATIC_ROUTES = [
   'zone-checker',
   'regulatory-updates',
   'builder-reputation',
+  'best-sectors-investment-2026',
+  'tenant-demand-heatmap',
+  'builder-reputation-score',
   // comparison (static set under /vs/)
   'vs/nobroker',
   'vs/magicbricks',

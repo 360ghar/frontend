@@ -163,6 +163,11 @@ const BuilderReputation = () => {
                   </ol>
                 </nav>
                 <h1 className="fs-28 fw-600 mb-10">{t('builderReputation.title')}</h1>
+                <p className="mb-15">
+                  <I18nLink to="/builder-reputation-score" className="me-3">Builder Reputation Score guide</I18nLink>
+                  <I18nLink to="/tenant-demand-heatmap" className="me-3">Tenant Demand Heatmap</I18nLink>
+                  <I18nLink to="/best-sectors-investment-2026">Best Sectors Investment 2026</I18nLink>
+                </p>
                 <p className="mb-0 color-text-3">
                   {t('builderReputation.description')}
                 </p>
