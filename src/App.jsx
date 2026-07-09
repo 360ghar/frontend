@@ -113,6 +113,9 @@ const ZoneCheckerDetail = lazy(() => import('./pages/data-hub/ZoneCheckerDetail'
 const RegulatoryUpdates = lazy(() => import('./pages/data-hub/RegulatoryUpdates'));
 const BuilderReputation = lazy(() => import('./pages/data-hub/BuilderReputation'));
 const BuilderReputationDetail = lazy(() => import('./pages/data-hub/BuilderReputationDetail'));
+const BuilderReputationScore = lazy(() => import('./pages/geo/BuilderReputationScore'));
+const TenantDemandHeatmap = lazy(() => import('./pages/geo/TenantDemandHeatmap'));
+const BestSectorsInvestment2026 = lazy(() => import('./pages/geo/BestSectorsInvestment2026'));
 
 const propertyRoutes = [
   { path: '/properties', element: <Property /> },
@@ -195,6 +198,9 @@ const dataHubRoutes = [
   { path: '/regulatory-updates', element: <RegulatoryUpdates /> },
   { path: '/builder-reputation', element: <BuilderReputation /> },
   { path: '/builder-reputation/:slug', element: <BuilderReputationDetail /> },
+  { path: '/builder-reputation-score', element: <BuilderReputationScore /> },
+  { path: '/tenant-demand-heatmap', element: <TenantDemandHeatmap /> },
+  { path: '/best-sectors-investment-2026', element: <BestSectorsInvestment2026 /> },
   { path: '/price-index/:citySlug', element: <PriceIndexPage /> },
 ];
 
