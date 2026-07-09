@@ -102,7 +102,7 @@ const AcreInGaj = () => {
                                 </div>
 
                                 {/* Headline answer */}
-                                <div className="p-4 rounded-3 shadow-sm mb-4 text-center" style={{ backgroundColor: '#fff5eb' }}>
+                                <div className="p-4 rounded-3 shadow-sm mb-4 text-center" style={{ backgroundColor: 'var(--main-color-lighter)' }}>
                                     <div className="display-6 fw-bold text-dark">{t('acreInGaj.headlineAnswer')}</div>
                                     <div className="small text-muted mt-2">{t('acreInGaj.headlineSub')}</div>
                                 </div>

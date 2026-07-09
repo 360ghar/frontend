@@ -802,20 +802,27 @@ export const generatePropertyProductStructuredData = (property) => {
           },
         }
       : {}),
-    review: property.reviews ? property.reviews.slice(0, 3).map(review => ({
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: review.rating || '4',
-        bestRating: '5',
-      },
-      author: {
-        '@type': 'Person',
-        name: review.author_name || 'Verified Buyer',
-      },
-      reviewBody: review.comment || review.review || '',
-      datePublished: review.created_at || new Date().toISOString(),
-    })) : undefined,
+    // Only emit reviews that have a real numeric rating — fabricated defaults
+    // (e.g. rating || '4') violate Google's Review Snippet spam policies.
+    review: Array.isArray(property.reviews)
+      ? property.reviews
+          .filter((review) => review && review.rating != null && review.rating !== '')
+          .slice(0, 3)
+          .map((review) => ({
+            '@type': 'Review',
+            reviewRating: {
+              '@type': 'Rating',
+              ratingValue: review.rating,
+              bestRating: '5',
+            },
+            author: {
+              '@type': 'Person',
+              name: review.author_name || 'Verified Buyer',
+            },
+            reviewBody: review.comment || review.review || '',
+            datePublished: review.created_at || new Date().toISOString(),
+          }))
+      : undefined,
     additionalProperty: [
       {
         '@type': 'PropertyValue',

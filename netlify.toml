@@ -124,6 +124,16 @@
   to = "/index.html"
   status = 200
 
+# Global security headers (applied to all responses). CSP intentionally omitted:
+# a tight CSP breaks Formspree, Places/Maps, Puter/AI Design Studio, and Vimeo.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self)"
+
 # Hashed JS chunks — content-addressed, safe to cache forever
 [[headers]]
   for = "/assets/*.js"

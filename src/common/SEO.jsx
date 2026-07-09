@@ -71,8 +71,9 @@ const SEO = ({
   const metaKeywords = keywords;
   const ogImage = absoluteUrl(image || siteMetadata.defaultOgImage);
 
-  // Auto-generate hreflang alternates based on current URL
-  const alternates = hreflangs || buildHreflangs(canonicalUrl);
+  // Suppress hreflang on noindex pages — they can't confirm return links and
+  // trigger "Missing Return Links" / "Noindex Return Links" audit warnings.
+  const alternates = noindex ? [] : (hreflangs || buildHreflangs(canonicalUrl));
 
   const ldBlocks = toArray(structuredData);
   const isArticle = type === 'article';
@@ -84,7 +85,8 @@ const SEO = ({
       <title>{metaTitle}</title>
       {metaDesc && <meta name="description" content={metaDesc} />}
       {metaKeywords && <meta name="keywords" content={metaKeywords} />}
-      <link rel="canonical" href={canonicalUrl} />
+      {/* Suppress canonical on noindex pages to avoid Non-Indexable Canonical errors. */}
+      {!noindex && <link rel="canonical" href={canonicalUrl} />}
       {prevUrl && <link rel="prev" href={absoluteUrl(prevUrl)} />}
       {nextUrl && <link rel="next" href={absoluteUrl(nextUrl)} />}
 
@@ -93,13 +95,14 @@ const SEO = ({
         name="robots"
         content={
           noindex
-            ? 'noindex,nofollow'
+            ? // Keep follow so noindex auth pages still pass link equity.
+              'noindex,follow'
             : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
         }
       />
       <meta
         name="googlebot"
-        content={noindex ? 'noindex,nofollow' : 'index, follow'}
+        content={noindex ? 'noindex,follow' : 'index, follow'}
       />
 
       {/* Alternate languages */}

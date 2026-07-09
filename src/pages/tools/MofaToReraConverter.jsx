@@ -52,8 +52,10 @@ const MofaToReraConverter = () => {
         const out = direction === 'mofa_to_rera'
             ? value * MOFA_TO_RERA_FACTOR
             : value / MOFA_TO_RERA_FACTOR;
-        const diff = out - value;
-        return { result: Math.round(out), delta: Math.round(diff) };
+        // Round result first, then derive delta from the rounded value so the
+        // displayed numbers stay consistent for decimal inputs.
+        const rounded = Math.round(out);
+        return { result: rounded, delta: rounded - value };
     }, [value, direction]);
 
     const handleSwap = () => {
@@ -78,8 +80,8 @@ const MofaToReraConverter = () => {
                     ]),
                     generateFaqStructuredData(FAQS),
                     generateHowToStructuredData({
-                        name: 'How to Convert MOFA to RERA Carpet Area',
-                        description: 'Convert MOFA carpet area to RERA carpet area (or vice versa) step by step',
+                        name: t('mofaToRera.howToTitle'),
+                        description: t('mofaToRera.formulaDesc'),
                         steps: HOW_TO_STEPS,
                     }),
                 ]}

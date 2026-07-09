@@ -207,6 +207,8 @@ import { generateBreadcrumbStructuredData, generateFaqStructuredData, generateHo
  
              <main className="body-bg">
                  <Header />
+
+                 <h1 className="visually-hidden">{t('loanEligibility.title')}</h1>
  
                  <section className="padding-y-50">
                      <div className="container">
@@ -215,7 +217,7 @@ import { generateBreadcrumbStructuredData, generateFaqStructuredData, generateHo
                                  <div className="row g-4">
                                      <div className="col-lg-6">
                                          <div className="calculator-form bg-white p-4 rounded-3 shadow-sm h-100">
-                                             <h4 className="mb-4">{t('loanEligibility.financialDetails')}</h4>
+                                             <h2 className="h4 mb-4">{t('loanEligibility.financialDetails')}</h2>
 
                                             {/* AUDIT FIX (3.3): range sliders alongside number inputs */}
                                             <div className="mb-3">
@@ -268,7 +270,7 @@ import { generateBreadcrumbStructuredData, generateFaqStructuredData, generateHo
  
                                      <div className="col-lg-6">
                                          <div className="bg-main text-white p-4 rounded-3 shadow-sm h-100 d-flex flex-column justify-content-center text-center">
-                                             <h3 className="text-white mb-2">{t('loanEligibility.maxEligibleLoan')}</h3>
+                                             <h2 className="h3 text-white mb-2">{t('loanEligibility.maxEligibleLoan')}</h2>
                                              <div className="display-4 fw-bold mb-4 text-white">
                                                  {formatCurrency(maxLoan)}
                                              </div>

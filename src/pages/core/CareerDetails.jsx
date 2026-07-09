@@ -12,7 +12,20 @@ import { siteMetadata } from '../../seo/siteMetadata';
 import { careerOpenings } from '../../data/careers';
 
 const CAREERS_EMAIL = 'info@360ghar.com';
-const TODAY_FALLBACK = '2025-01-15';
+
+/** ISO date string for today (UTC). Used so JobPosting validThrough never lands in the past. */
+const todayIso = () => new Date().toISOString().split('T')[0];
+
+/**
+ * JobPosting.validThrough must be in the future. Prefer postedDate + 60 days,
+ * but never return a date earlier than today + 30 days.
+ */
+const computeValidThrough = (postedDate) => {
+  const base = new Date(postedDate || todayIso());
+  const fromPosted = new Date(base.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const minFuture = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  return (fromPosted > minFuture ? fromPosted : minFuture).toISOString().split('T')[0];
+};
 
 const CAREER_DETAILS_LAYOUT = {
   content: {
@@ -144,8 +157,8 @@ const CareerDetails = () => {
     },
     employmentType: 'INTERN',
     jobDuration: opening.duration,
-    datePosted: opening.postedDate || TODAY_FALLBACK,
-    validThrough: new Date(new Date(opening.postedDate || TODAY_FALLBACK).getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    datePosted: opening.postedDate || todayIso(),
+    validThrough: computeValidThrough(opening.postedDate),
     directApply: true,
     industry: 'Real Estate',
   };

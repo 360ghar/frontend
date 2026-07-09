@@ -17,7 +17,15 @@ const CAREER_VALUES = [
   { icon: 'fas fa-graduation-cap', text: 'Learn fast — mentors, reviews, and ownership' },
 ];
 
-const TODAY_FALLBACK = '2025-01-15';
+const todayIso = () => new Date().toISOString().split('T')[0];
+
+/** Prefer postedDate + 60d, but never expire JobPosting schema in the past. */
+const computeValidThrough = (postedDate) => {
+  const base = new Date(postedDate || todayIso());
+  const fromPosted = new Date(base.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const minFuture = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  return (fromPosted > minFuture ? fromPosted : minFuture).toISOString().split('T')[0];
+};
 
 /**
  * AUDIT FIX (4.8): derive a human-readable category from each opening so the
@@ -70,8 +78,8 @@ const Careers = () => {
         name: opening.title,
         title: opening.title,
         description: opening.description.slice(0, 200),
-        datePosted: opening.postedDate || TODAY_FALLBACK,
-        validThrough: new Date(new Date(opening.postedDate || TODAY_FALLBACK).getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        datePosted: opening.postedDate || todayIso(),
+        validThrough: computeValidThrough(opening.postedDate),
         hiringOrganization: {
           '@type': 'Organization',
           name: '360Ghar',

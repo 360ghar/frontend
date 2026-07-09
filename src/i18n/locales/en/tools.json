@@ -44,8 +44,6 @@
     "months": "months",
     "amortizationSchedule": "Amortization Schedule (Yearly)",
     "year": "Year",
-    "principal": "Principal",
-    "interest": "Interest",
     "balance": "Balance"
   },
   "areaConverter": {
@@ -91,10 +89,22 @@
       }
     },
     "howToSteps": {
-      "step1": { "name": "Select input unit", "text": "Choose the unit you want to convert from — sq ft, sq m, bigha, kanal, marla, acre, hectare, or others." },
-      "step2": { "name": "Enter the area value", "text": "Type the numeric value of the area you want to convert." },
-      "step3": { "name": "Select output unit", "text": "Choose the unit you want to convert to. The result updates instantly." },
-      "step4": { "name": "Copy or note the result", "text": "The converted value is displayed immediately. You can copy it for use in property documents or calculations." }
+      "step1": {
+        "name": "Select input unit",
+        "text": "Choose the unit you want to convert from — sq ft, sq m, bigha, kanal, marla, acre, hectare, or others."
+      },
+      "step2": {
+        "name": "Enter the area value",
+        "text": "Type the numeric value of the area you want to convert."
+      },
+      "step3": {
+        "name": "Select output unit",
+        "text": "Choose the unit you want to convert to. The result updates instantly."
+      },
+      "step4": {
+        "name": "Copy or note the result",
+        "text": "The converted value is displayed immediately. You can copy it for use in property documents or calculations."
+      }
     },
     "heroTitle": "Land Area Converter",
     "heroDesc": "Convert between Indian land measurement units instantly — Gaj to Acre, Sq Ft to Gaj, Bigha to Acre, Ground to Acre, and more. Free and accurate area conversion for property buyers and sellers.",
@@ -126,9 +136,9 @@
     "marla": "Marla"
   },
   "areaCalculator": {
-    "title": "Free Carpet Area Calculator – MOFA to RERA, Built-up & Super Area | 360Ghar",
-    "description": "Free carpet area calculator: convert MOFA to RERA, super built-up to carpet area, and find loading factor. Instant sq ft results for Indian homes.",
-    "keywords": "carpet area to sq ft calculator, carpet area calculator, mofa to rera carpet conversion calculator, rera carpet area calculator, super built up area to carpet area calculator, carpet area to built up area calculator, carpet area to built-up area calculator India, built up area to carpet area calculator, carpet area in square feet calculator, how to calculate carpet area from super built up area, carpet area calculation formula, carpet area for flat calculator, loading factor calculator, carpet area vs built up area, RERA carpet area, carpet area converter, area calculation formula India, flat carpet area calculator, built up area vs carpet area, carpet area to super built up area calculator, carpet area kya hota hai, 360ghar",
+    "title": "Free Carpet Area & Loading Factor Calculator | Super Built-up | 360Ghar",
+    "description": "Free carpet area calculator: convert super built-up to carpet area, estimate built-up area, and find loading factor. Instant sq ft results for Indian homes.",
+    "keywords": "carpet area calculator, super built up area to carpet area calculator, loading factor calculator, built up area to carpet area calculator, carpet area vs built up area, carpet area calculation formula, flat carpet area calculator, area calculation formula India, RERA carpet area, 360ghar",
     "faqs": {
       "q1": {
         "question": "How do I calculate the area of a room?",
@@ -148,7 +158,7 @@
       },
       "q5": {
         "question": "How do I convert carpet area to built-up area?",
-        "answer": "To convert carpet area to built-up area, add 10-15% to the carpet area. The formula is: Built-up Area = Carpet Area × 1.10 to 1.15. This accounts for walls, balconies, and exclusive terraces. For example, if carpet area is 1000 sq ft, built-up area is approximately 1100-1150 sq ft."
+        "answer": "Under MOFA (Maharashtra Ownership Flats Act), carpet area excluded internal partition walls. RERA carpet area includes internal walls and is typically about 5-8% larger — an estimate only; exact figures depend on the flat layout. Use our dedicated MOFA to RERA converter for a rule-of-thumb estimate, and always verify against the registered sale agreement."
       },
       "q6": {
         "question": "What is MOFA to RERA carpet area conversion?",
@@ -168,10 +178,22 @@
       }
     },
     "howToSteps": {
-      "step1": { "name": "Measure room dimensions", "text": "Measure the length and width of each room in feet or meters using a measuring tape or laser distance meter." },
-      "step2": { "name": "Calculate carpet area", "text": "Multiply length × width for each room. Add all room areas to get total carpet area." },
-      "step3": { "name": "Add walls for built-up area", "text": "Add 10-15% to carpet area for walls and balconies to get built-up area." },
-      "step4": { "name": "Calculate super built-up area", "text": "Add the loading factor (25-35%) to built-up area to get super built-up area. This includes common areas like corridors and lobbies." }
+      "step1": {
+        "name": "Measure room dimensions",
+        "text": "Measure the length and width of each room in feet or meters using a measuring tape or laser distance meter."
+      },
+      "step2": {
+        "name": "Calculate carpet area",
+        "text": "Multiply length × width for each room. Add all room areas to get total carpet area."
+      },
+      "step3": {
+        "name": "Add walls for built-up area",
+        "text": "Add 10-15% to carpet area for walls and balconies to get built-up area."
+      },
+      "step4": {
+        "name": "Calculate super built-up area",
+        "text": "Add the loading factor (25-35%) to built-up area to get super built-up area. This includes common areas like corridors and lobbies."
+      }
     },
     "enterPropertyDetails": "Enter Property Details",
     "superBuiltupArea": "Super Built-up Area (Sq. Ft.)",
@@ -228,10 +250,22 @@
       }
     },
     "howToSteps": {
-      "step1": { "name": "Enter your monthly income", "text": "Enter your gross monthly income including salary, business income, and any other regular income sources." },
-      "step2": { "name": "Add existing obligations", "text": "Enter your current EMIs, credit card payments, and any other fixed monthly debt obligations." },
-      "step3": { "name": "Check the eligibility result", "text": "The calculator shows your maximum eligible loan amount based on FOIR, income multiplier, and other factors." },
-      "step4": { "name": "Compare with property value", "text": "Banks fund 75-90% of property value. Ensure your eligible amount covers the required portion after your down payment." }
+      "step1": {
+        "name": "Enter your monthly income",
+        "text": "Enter your gross monthly income including salary, business income, and any other regular income sources."
+      },
+      "step2": {
+        "name": "Add existing obligations",
+        "text": "Enter your current EMIs, credit card payments, and any other fixed monthly debt obligations."
+      },
+      "step3": {
+        "name": "Check the eligibility result",
+        "text": "The calculator shows your maximum eligible loan amount based on FOIR, income multiplier, and other factors."
+      },
+      "step4": {
+        "name": "Compare with property value",
+        "text": "Banks fund 75-90% of property value. Ensure your eligible amount covers the required portion after your down payment."
+      }
     },
     "financialDetails": "Your Financial Details",
     "netMonthlyIncome": "Net Monthly Income (₹)",
@@ -315,10 +349,22 @@
       }
     },
     "howToSteps": {
-      "step1": { "name": "Select property type", "text": "Choose whether you're buying a flat, plot, villa, or commercial property. The checklist adjusts based on property type." },
-      "step2": { "name": "Review required documents", "text": "Browse the complete checklist of 40+ documents organized by category — identity, property, legal, financial." },
-      "step3": { "name": "Track document status", "text": "Mark each document as collected, pending, or not applicable. Track your progress through the property purchase." },
-      "step4": { "name": "Download or share the checklist", "text": "Export your checklist progress or share it with your lawyer or family members for collaborative tracking." }
+      "step1": {
+        "name": "Select property type",
+        "text": "Choose whether you're buying a flat, plot, villa, or commercial property. The checklist adjusts based on property type."
+      },
+      "step2": {
+        "name": "Review required documents",
+        "text": "Browse the complete checklist of 40+ documents organized by category — identity, property, legal, financial."
+      },
+      "step3": {
+        "name": "Track document status",
+        "text": "Mark each document as collected, pending, or not applicable. Track your progress through the property purchase."
+      },
+      "step4": {
+        "name": "Download or share the checklist",
+        "text": "Export your checklist progress or share it with your lawyer or family members for collaborative tracking."
+      }
     },
     "yourProgress": "Your Progress",
     "completed": "% Completed",
@@ -563,10 +609,22 @@
       }
     },
     "howToSteps": {
-      "step1": { "name": "Upload your floor plan", "text": "Upload an image or photo of your property's floor plan. Our AI will analyze the layout." },
-      "step2": { "name": "Mark the compass directions", "text": "Ensure the floor plan shows north direction correctly. The analysis depends on accurate orientation." },
-      "step3": { "name": "Review Vastu analysis", "text": "The AI checker identifies Vastu-compliant and non-compliant zones in your floor plan." },
-      "step4": { "name": "Apply Vastu remedies", "text": "For non-compliant areas, the tool suggests remedies like color changes, mirror placement, or room reassignment." }
+      "step1": {
+        "name": "Upload your floor plan",
+        "text": "Upload an image or photo of your property's floor plan. Our AI will analyze the layout."
+      },
+      "step2": {
+        "name": "Mark the compass directions",
+        "text": "Ensure the floor plan shows north direction correctly. The analysis depends on accurate orientation."
+      },
+      "step3": {
+        "name": "Review Vastu analysis",
+        "text": "The AI checker identifies Vastu-compliant and non-compliant zones in your floor plan."
+      },
+      "step4": {
+        "name": "Apply Vastu remedies",
+        "text": "For non-compliant areas, the tool suggests remedies like color changes, mirror placement, or room reassignment."
+      }
     },
     "faqTitle": "Frequently Asked Questions About Vastu",
     "howToCheckOnlineTitle": "How to Check Vastu of Your House Online",
@@ -659,7 +717,7 @@
     "showLess": "Show Less",
     "showMoreStyles": "Show More Styles ({{count}} more)",
     "customInstructions": "Custom Instructions",
-    "customInstructionsPlaceholder": "Add specific details you want in your design...\n\nExamples:\n\u2022 'Include a large window with city view'\n\u2022 'Use warm lighting and plants'\n\u2022 'Add a reading nook by the window'\n\u2022 'Make it spacious and airy'",
+    "customInstructionsPlaceholder": "Add specific details you want in your design...\n\nExamples:\n• 'Include a large window with city view'\n• 'Use warm lighting and plants'\n• 'Add a reading nook by the window'\n• 'Make it spacious and airy'",
     "promptNote": "Your style and room selections will be combined with this prompt",
     "sourcePhoto": "Source Photo",
     "uploadPhoto": "Upload Your Photo",
@@ -776,7 +834,7 @@
     "description": "Convert MOFA carpet area to RERA carpet area instantly. Free MOFA to RERA carpet conversion calculator for Maharashtra flats. Accurate sq ft results.",
     "keywords": "mofa to rera carpet conversion, mofa to rera calculator, mofa carpet area, rera carpet area, mofa vs rera carpet area, maharashtra carpet area calculator, mofa to rera conversion formula, rera carpet area calculator, carpet area converter mofa rera, mofa rera difference, 360ghar",
     "heroTitle": "MOFA to RERA Carpet Area Converter",
-    "heroDesc": "Convert MOFA carpet area to RERA carpet area in seconds. RERA carpet is roughly 5-8% larger than MOFA carpet because it includes internal partition walls that MOFA excluded. RERA carpet excludes balconies, verandahs, and open terraces (RERA Act 2016 §2(k)).",
+    "heroDesc": "Estimate MOFA carpet area to RERA carpet area in seconds. RERA carpet is often roughly 5-8% larger than MOFA carpet because it includes internal partition walls that MOFA excluded. This is a rule-of-thumb estimate — always verify against the sale agreement (RERA Act 2016 §2(k)).",
     "converterHeading": "MOFA ↔ RERA Converter",
     "inputValue": "Area value",
     "convertFrom": "Convert from",
@@ -784,7 +842,7 @@
     "mofaCarpet": "MOFA carpet area",
     "reraCarpet": "RERA carpet area",
     "result": "Result",
-    "resultHint": "Conversion uses the standard RERA-vs-MOFA difference of ~5-8% (RERA counts the internal partition walls that MOFA excluded).",
+    "resultHint": "Estimate only: uses a ~6% uplift as a midpoint of the typical 5-8% RERA-vs-MOFA difference (RERA counts internal partition walls that MOFA excluded).",
     "deltaLabel": "Difference vs MOFA",
     "explanationTitle": "MOFA Carpet vs RERA Carpet",
     "explanationMofa": "MOFA carpet area (Maharashtra Ownership Flats Act) is the net usable internal floor area of a flat measured within the inner face of the walls. It excludes internal partition walls, balconies, verandahs, and open terraces.",
@@ -797,10 +855,22 @@
     "reraCol": "RERA Carpet Area (approx)",
     "howToTitle": "How to Convert MOFA to RERA Carpet Area",
     "howToSteps": {
-      "step1": { "name": "Enter the carpet area", "text": "Type the MOFA carpet area (or RERA carpet area) you already know in square feet." },
-      "step2": { "name": "Pick the conversion direction", "text": "Select whether you are converting from MOFA to RERA, or from RERA to MOFA." },
-      "step3": { "name": "Read the converted value", "text": "The converter applies the standard ~6% uplift (or ~5.7% reduction) and shows the equivalent carpet area instantly." },
-      "step4": { "name": "Cross-check the agreement", "text": "Confirm the figure against the registered sale agreement and the project's RERA registration for exact numbers." }
+      "step1": {
+        "name": "Enter the carpet area",
+        "text": "Type the MOFA carpet area (or RERA carpet area) you already know in square feet."
+      },
+      "step2": {
+        "name": "Pick the conversion direction",
+        "text": "Select whether you are converting from MOFA to RERA, or from RERA to MOFA."
+      },
+      "step3": {
+        "name": "Read the converted value",
+        "text": "The converter applies the standard ~6% uplift (or ~5.7% reduction) and shows the equivalent carpet area instantly."
+      },
+      "step4": {
+        "name": "Cross-check the agreement",
+        "text": "Confirm the figure against the registered sale agreement and the project's RERA registration for exact numbers."
+      }
     },
     "faqTitle": "Frequently Asked Questions",
     "faqs": {
@@ -854,10 +924,22 @@
     "sqFtCol": "1 Unit in Sq. Ft.",
     "howToTitle": "How to Use the Sq Ft Calculator",
     "howToSteps": {
-      "step1": { "name": "Enter the amount", "text": "Type the area value you want to convert (for example, the carpet area from your builder's brochure)." },
-      "step2": { "name": "Choose the source unit", "text": "Pick the unit the value is currently in — square meters, square yards (gaj), acres, or square feet." },
-      "step3": { "name": "Pick the target unit", "text": "Select the unit you want to convert to. Choose Sq. Ft. for a carpet-area-to-sq-ft conversion." },
-      "step4": { "name": "Read the result", "text": "The calculator instantly shows the converted value using standard Indian conversion rates." }
+      "step1": {
+        "name": "Enter the amount",
+        "text": "Type the area value you want to convert (for example, the carpet area from your builder's brochure)."
+      },
+      "step2": {
+        "name": "Choose the source unit",
+        "text": "Pick the unit the value is currently in — square meters, square yards (gaj), acres, or square feet."
+      },
+      "step3": {
+        "name": "Pick the target unit",
+        "text": "Select the unit you want to convert to. Choose Sq. Ft. for a carpet-area-to-sq-ft conversion."
+      },
+      "step4": {
+        "name": "Read the result",
+        "text": "The calculator instantly shows the converted value using standard Indian conversion rates."
+      }
     },
     "faqTitle": "Frequently Asked Questions",
     "faqs": {
@@ -912,10 +994,22 @@
     "explanationDesc": "An acre is a standard imperial land unit equal to 43,560 sq ft, used across India for agricultural and large plots. A gaj (also called square yard) equals 9 sq ft and is the most common unit for residential plots in North India. Since 1 acre = 43,560 sq ft and 1 gaj = 9 sq ft, one acre contains exactly 4,840 gaj.",
     "howToTitle": "How to Convert Acre to Gaj",
     "howToSteps": {
-      "step1": { "name": "Enter the acre value", "text": "Type the area in acres (or gaj) that you want to convert." },
-      "step2": { "name": "Choose the units", "text": "Select the source unit (acre or gaj) and the target unit (gaj, sq ft, or acre)." },
-      "step3": { "name": "Read the result", "text": "The converter uses the exact rate (1 acre = 4840 gaj = 43,560 sq ft) to show the converted value instantly." },
-      "step4": { "name": "Verify against land records", "text": "Cross-check the converted figure against the sale deed or local land record for official transactions." }
+      "step1": {
+        "name": "Enter the acre value",
+        "text": "Type the area in acres (or gaj) that you want to convert."
+      },
+      "step2": {
+        "name": "Choose the units",
+        "text": "Select the source unit (acre or gaj) and the target unit (gaj, sq ft, or acre)."
+      },
+      "step3": {
+        "name": "Read the result",
+        "text": "The converter uses the exact rate (1 acre = 4840 gaj = 43,560 sq ft) to show the converted value instantly."
+      },
+      "step4": {
+        "name": "Verify against land records",
+        "text": "Cross-check the converted figure against the sale deed or local land record for official transactions."
+      }
     },
     "faqTitle": "Frequently Asked Questions",
     "faqs": {
