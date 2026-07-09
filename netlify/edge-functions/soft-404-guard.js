@@ -165,9 +165,16 @@ const STATIC_RE = new RegExp(
 const EXACT_PASSTHROUGH = new Set([
   '/robots.txt',
   '/llms.txt',
+  '/llms-full.txt',
   '/manifest.json',
+  '/manifest.webmanifest',
   '/sw.js',
   '/registerSW.js',
+  '/404.html',
+  '/index.html',
+  '/openapi.json',
+  '/rss.xml',
+  '/BingSiteAuth.xml',
 ]);
 
 const PREFIX_PASSTHROUGH = [
@@ -215,28 +222,21 @@ function isValidRoute(normalizedPath) {
   return false;
 }
 
-export default async (_request, context) => {
-  const url = new URL(context.request.url);
-  const pathname = url.pathname;
-
-  // 1. Static assets, API, well-known, sitemaps, service worker, and any
-  //    extensioned request: never intercept — let Netlify handle them.
-  if (isPassthrough(pathname)) {
-    return context.next();
+/**
+ * Serve public/404.html with a real HTTP 404 + noindex.
+ *
+ * Netlify Edge no longer documents context.rewrite(); returning `new URL(...)`
+ * is an internal rewrite with status 200, which would reintroduce soft-404s.
+ * Fetch the static 404 document and re-wrap with status 404 instead.
+ */
+async function serveNotFound(request) {
+  const origin404 = await fetch(new URL('/404.html', request.url));
+  // If the static file is missing, fall through (caller fail-opens).
+  if (!origin404.ok) {
+    throw new Error(`404.html fetch failed: ${origin404.status}`);
   }
-
-  // 2. Normalize (strip /hi prefix + trailing slashes), then test the
-  //    valid-route allowlist.
-  const normalizedPath = normalize(pathname);
-  if (isValidRoute(normalizedPath)) {
-    return context.next();
-  }
-
-  // 3. Nothing matched → serve 404.html with HTTP 404 + noindex so Google
-  //    drops the URL instead of flagging the 200 shell as a soft-404.
-  const notFoundUrl = new URL('/404.html', url.origin);
-  const resp = await context.rewrite(notFoundUrl);
-  return new Response(resp.body, {
+  const body = await origin404.text();
+  return new Response(body, {
     status: 404,
     statusText: 'Not Found',
     headers: {
@@ -245,6 +245,36 @@ export default async (_request, context) => {
       'Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
     },
   });
+}
+
+export default async (request, context) => {
+  // FAIL OPEN: any unexpected throw must not 500 the whole site. A false
+  // negative (SPA 200 for a junk URL) is far better than a production outage.
+  // Netlify Edge: first arg is the Fetch Request. Do NOT use context.request.
+  try {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+
+    // 1. Static assets, API, well-known, sitemaps, service worker, and any
+    //    extensioned request: never intercept. Bare `return` continues the
+    //    request chain (preferred when we do not need the response body).
+    if (isPassthrough(pathname)) {
+      return;
+    }
+
+    // 2. Normalize (strip /hi prefix + trailing slashes), then test the
+    //    valid-route allowlist.
+    const normalizedPath = normalize(pathname);
+    if (isValidRoute(normalizedPath)) {
+      return;
+    }
+
+    // 3. Nothing matched → real HTTP 404 + noindex (not the SPA 200 shell).
+    return await serveNotFound(request);
+  } catch (err) {
+    console.error('[soft-404-guard] fail-open:', err && err.message ? err.message : err);
+    return;
+  }
 };
 
 export const config = {
@@ -256,5 +286,14 @@ export const config = {
     '/api/*',
     '/blueprint3d/*',
     '/rss/*',
+    '/robots.txt',
+    '/llms.txt',
+    '/llms-full.txt',
+    '/sitemap.xml',
+    '/sitemap-*.xml',
+    '/sw.js',
+    '/registerSW.js',
+    '/404.html',
+    '/openapi.json',
   ],
 };
