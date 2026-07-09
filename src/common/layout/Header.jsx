@@ -186,7 +186,7 @@ const Header = ({
                             ) : (
                                 <div className="header-cta-group d-lg-flex align-items-center d-none">
                                     <div className="auth-buttons">
-                                        <I18nLink to="/login" className="btn btn-outline-main btn-sm">
+                                        <I18nLink to="/login" className={`btn btn-outline-main btn-sm ${String(headerClass || '').split(/\s+/).includes('dark-header') ? 'btn-outline-main-dark' : ''}`}>
                                             <i className="fas fa-sign-in-alt me-2"></i>
                                             {t('header.signIn')}
                                         </I18nLink>
