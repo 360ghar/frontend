@@ -1,7 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { siteMetadata, absoluteUrl } from '../seo/siteMetadata';
 import { useLocation } from 'react-router-dom';
-import useLocaleStore from '../store/localeStore';
 import { localizePath, stripLocalePrefix } from '../i18n/I18nLink';
 
 const toArray = (maybeArray) => (Array.isArray(maybeArray) ? maybeArray : [maybeArray].filter(Boolean));
@@ -50,23 +49,31 @@ const SEO = ({
   video,
 }) => {
   const location = useLocation();
-  const storeLocale = useLocaleStore((s) => s.locale);
   const rawPath = (location.pathname || '').replace(/\/+$/, '') || '/';
   const pathLocale = inferLocaleFromPath(rawPath);
-  // Prefer store locale when explicitly set; fall back to path inference to handle
-  // the initial render before LocaleGate's useLayoutEffect fires in concurrent mode.
-  const locale = pathLocale === 'hi' ? 'hi' : (storeLocale === 'hi' ? 'hi' : 'en');
+  // SEO locale must be DETERMINISTIC from the URL path (same reasoning as the
+  // canonical below): deriving it from the store locale can make og:url /
+  // og:locale / <html lang> disagree with the canonical across renders.
+  const locale = pathLocale;
   const localizedPath = localizeSeoPath(rawPath, locale);
   const computedUrl = absoluteUrl(localizeSeoPath(url || localizedPath, locale));
-  const canonicalUrl = absoluteUrl(localizeSeoPath((canonical || localizedPath).replace(/\/+$/, '') || '/', locale));
+  // Canonical must be DETERMINISTIC from the URL path, never from the store
+  // locale. The store value can flip between renders (initial render before
+  // LocaleGate's useLayoutEffect fires in concurrent mode), which makes the
+  // canonical href oscillate between /…/ and /hi/…/ and look like duplicate
+  // pages to crawlers. We therefore derive the canonical's locale from
+  // `pathLocale` (computed above from rawPath) so it is stable across renders.
+  // The explicit `canonical` prop override still wins when passed.
+  const canonicalUrl = absoluteUrl(localizeSeoPath((canonical || localizedPath).replace(/\/+$/, '') || '/', pathLocale));
 
   const metaTitle = title || siteMetadata.defaultTitle;
   const metaDesc = description || siteMetadata.defaultDescription;
   const metaKeywords = keywords;
   const ogImage = absoluteUrl(image || siteMetadata.defaultOgImage);
 
-  // Auto-generate hreflang alternates based on current URL
-  const alternates = hreflangs || buildHreflangs(canonicalUrl);
+  // Suppress hreflang on noindex pages — they can't confirm return links and
+  // trigger "Missing Return Links" / "Noindex Return Links" audit warnings.
+  const alternates = noindex ? [] : (hreflangs || buildHreflangs(canonicalUrl));
 
   const ldBlocks = toArray(structuredData);
   const isArticle = type === 'article';
@@ -78,7 +85,8 @@ const SEO = ({
       <title>{metaTitle}</title>
       {metaDesc && <meta name="description" content={metaDesc} />}
       {metaKeywords && <meta name="keywords" content={metaKeywords} />}
-      <link rel="canonical" href={canonicalUrl} />
+      {/* Suppress canonical on noindex pages to avoid Non-Indexable Canonical errors. */}
+      {!noindex && <link rel="canonical" href={canonicalUrl} />}
       {prevUrl && <link rel="prev" href={absoluteUrl(prevUrl)} />}
       {nextUrl && <link rel="next" href={absoluteUrl(nextUrl)} />}
 
@@ -87,13 +95,14 @@ const SEO = ({
         name="robots"
         content={
           noindex
-            ? 'noindex,nofollow'
+            ? // Keep follow so noindex auth pages still pass link equity.
+              'noindex,follow'
             : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
         }
       />
       <meta
         name="googlebot"
-        content={noindex ? 'noindex,nofollow' : 'index, follow'}
+        content={noindex ? 'noindex,follow' : 'index, follow'}
       />
 
       {/* Alternate languages */}
@@ -147,10 +156,11 @@ const SEO = ({
       {video && <meta name="twitter:player:width" content="1280" />}
       {video && <meta name="twitter:player:height" content="720" />}
 
-      {/* Structured Data */}
+      {/* Structured Data — escape '<' so a review body or other string with
+          '</script>' can't break out of the JSON-LD block (matters on SSR). */}
       {ldBlocks.map((ld, idx) => (
         <script key={idx} type="application/ld+json">
-          {JSON.stringify({ '@context': 'https://schema.org', ...ld })}
+          {JSON.stringify({ '@context': 'https://schema.org', ...ld }).replace(/</g, '\\u003c')}
         </script>
       ))}
     </Helmet>

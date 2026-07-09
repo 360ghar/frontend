@@ -17,8 +17,15 @@ const CAREER_VALUES = [
   { icon: 'fas fa-graduation-cap', text: 'Learn fast — mentors, reviews, and ownership' },
 ];
 
-const TODAY = new Date().toISOString().split('T')[0];
-const VALID_THROUGH = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+const todayIso = () => new Date().toISOString().split('T')[0];
+
+/** Prefer postedDate + 60d, but never expire JobPosting schema in the past. */
+const computeValidThrough = (postedDate) => {
+  const base = new Date(postedDate || todayIso());
+  const fromPosted = new Date(base.getTime() + 60 * 24 * 60 * 60 * 1000);
+  const minFuture = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  return (fromPosted > minFuture ? fromPosted : minFuture).toISOString().split('T')[0];
+};
 
 /**
  * AUDIT FIX (4.8): derive a human-readable category from each opening so the
@@ -69,9 +76,10 @@ const Careers = () => {
       hasPart: careerOpenings.map((opening) => ({
         '@type': 'JobPosting',
         name: opening.title,
+        title: opening.title,
         description: opening.description.slice(0, 200),
-        datePosted: TODAY,
-        validThrough: VALID_THROUGH,
+        datePosted: opening.postedDate || todayIso(),
+        validThrough: computeValidThrough(opening.postedDate),
         hiringOrganization: {
           '@type': 'Organization',
           name: '360Ghar',
@@ -81,12 +89,24 @@ const Careers = () => {
           '@type': 'Place',
           address: {
             '@type': 'PostalAddress',
+            streetAddress: 'Sector 50, Gurugram',
             addressLocality: 'Gurugram',
             addressRegion: 'Haryana',
+            postalCode: '122001',
             addressCountry: 'IN',
           },
         },
-        employmentType: 'INTERNSHIP',
+        employmentType: 'INTERN',
+        baseSalary: {
+          '@type': 'MonetaryAmount',
+          currency: 'INR',
+          value: {
+            '@type': 'QuantitativeValue',
+            value: 15000,
+            unitText: 'MONTH',
+          },
+        },
+        directApply: true,
       })),
       breadcrumb: {
         '@type': 'BreadcrumbList',

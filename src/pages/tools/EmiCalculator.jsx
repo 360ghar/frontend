@@ -257,7 +257,7 @@ const EmiCalculator = () => {
                         <div className="row justify-content-center">
                             <div className="col-lg-10">
                                 <div className="section-heading text-center mb-5">
-                                    <h2 className="section-title">{t('emi.headingTitle')}</h2>
+                                    <h1 className="section-title">{t('emi.headingTitle')}</h1>
                                     <p className="section-desc">
                                         {t('emi.headingDesc')}
                                     </p>
