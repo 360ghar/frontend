@@ -73,7 +73,9 @@ describe('authService.login', () => {
     });
 
     const authService = await loadAuthService();
-    await expect(authService.login('9999999999', 'wrong')).rejects.toThrow(/invalid login credentials/i);
+    await expect(authService.login('9999999999', 'wrong')).rejects.toThrow(
+      /invalid email\/phone or password/i
+    );
     expect(apiGet).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import api, { publicApi } from './api';
+import { mapSupabaseAuthError } from '../lib/authErrors';
 import { ensureSupabaseClient, setCachedAccessToken } from './supabaseClient';
 import { setLastAuthMethod, AUTH_METHODS } from './lastAuthMethod';
 
@@ -31,7 +32,7 @@ export const authService = {
 
     const { data, error } = await client.auth.signInWithPassword(credentials);
     if (error || !data.session) {
-      throw new Error(error?.message || 'Login failed');
+      throw new Error(mapSupabaseAuthError(error));
     }
 
     // Populate the token cache immediately so the post-signIn fetches (and the
@@ -93,7 +94,7 @@ export const authService = {
       const hint = /redirect|uri|mismatch/i.test(msg)
         ? ' (Ensure the callback URL is allowlisted in Supabase and the Supabase Google callback is in Google Cloud Console.)'
         : '';
-      throw new Error(msg + hint);
+      throw new Error(mapSupabaseAuthError(error) + hint);
     }
     return data;
   },
@@ -103,7 +104,7 @@ export const authService = {
     const client = await ensureSupabaseClient();
     const { data, error } = await client.auth.exchangeCodeForSession(code);
     if (error) {
-      throw new Error(error.message || 'Failed to complete sign-in');
+      throw new Error(mapSupabaseAuthError(error));
     }
     return data;
   },
@@ -140,7 +141,7 @@ export const authService = {
       options: { shouldCreateUser },
     });
     if (error) {
-      throw new Error(error.message || 'Failed to send OTP');
+      throw new Error(mapSupabaseAuthError(error));
     }
     return { success: true };
   },
@@ -153,7 +154,7 @@ export const authService = {
       type: 'sms',
     });
     if (error || !data.session) {
-      throw new Error(error?.message || 'Invalid or expired code');
+      throw new Error(mapSupabaseAuthError(error, 'otp'));
     }
     return data;
   },
@@ -171,7 +172,7 @@ export const authService = {
       },
     });
     if (error) {
-      throw new Error(error.message || 'Failed to send OTP');
+      throw new Error(mapSupabaseAuthError(error));
     }
     return { success: true };
   },
@@ -184,7 +185,7 @@ export const authService = {
       type: 'email',
     });
     if (error || !data.session) {
-      throw new Error(error?.message || 'Invalid or expired code');
+      throw new Error(mapSupabaseAuthError(error, 'otp'));
     }
     return data;
   },
@@ -194,7 +195,7 @@ export const authService = {
     const client = await ensureSupabaseClient();
     const { error } = await client.auth.updateUser({ password });
     if (error) {
-      throw new Error(error.message || 'Failed to set password');
+      throw new Error(mapSupabaseAuthError(error));
     }
     return { success: true };
   },
@@ -205,7 +206,7 @@ export const authService = {
     const client = await ensureSupabaseClient();
     const { error } = await client.auth.updateUser({ phone: normalizePhoneForAuth(phone) });
     if (error) {
-      throw new Error(error.message || 'Failed to send verification code');
+      throw new Error(mapSupabaseAuthError(error));
     }
     return { success: true };
   },
@@ -219,7 +220,7 @@ export const authService = {
       type: 'phone_change',
     });
     if (error) {
-      throw new Error(error?.message || 'Invalid or expired code');
+      throw new Error(mapSupabaseAuthError(error, 'otp'));
     }
     return data;
   },
@@ -256,7 +257,7 @@ export const authService = {
     const client = await ensureSupabaseClient();
     const { error } = await client.auth.updateUser({ password: newPassword });
     if (error) {
-      throw new Error(error.message || 'Failed to reset password');
+      throw new Error(mapSupabaseAuthError(error));
     }
     return { success: true };
   },
@@ -291,7 +292,7 @@ export const authService = {
     const { error: verifyError } = await client.auth.signInWithPassword(credentials);
 
     if (verifyError) {
-      throw new Error('Current password is incorrect');
+      throw new Error(mapSupabaseAuthError(verifyError));
     }
 
     // Current password verified — update to the new password.
@@ -300,7 +301,7 @@ export const authService = {
     });
 
     if (error) {
-      throw new Error(error.message || 'Failed to change password');
+      throw new Error(mapSupabaseAuthError(error));
     }
 
     return { success: true };
