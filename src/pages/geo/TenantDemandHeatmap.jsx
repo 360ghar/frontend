@@ -101,10 +101,10 @@ const TIER_LABEL = {
   emerging: "Emerging — Fast Growing",
 };
 const TIER_COLOR = {
-  "ultra-high": "#dc2626",
-  high: "#d97706",
-  medium: "#2563eb",
-  emerging: "#7c3aed",
+  "ultra-high": 'var(--danger-color)',
+  high: 'var(--warning-color)',
+  medium: 'var(--cta-color)',
+  emerging: 'var(--main-color-dark)',
 };
 
 const SCHEMA = {
@@ -190,7 +190,7 @@ export default function TenantDemandHeatmap() {
       <MobileMenu />
       <main className="body-bg">
         <Header />
-        <div className="geo-page tenant-demand-heatmap" id="main-content">
+        <div className="geo-page tenant-demand-heatmap">
 
 
         {/* Hero */}

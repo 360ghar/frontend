@@ -67,7 +67,7 @@ Generates printable rent receipts for HRA tax exemption claims. Uses `react-to-p
 
 ### MofaToReraConverter (`/mofa-to-rera-converter`)
 
-Converts between MOFA and RERA carpet area (RERA carpet ≈ MOFA carpet + balcony/terrace, ~6% larger). Targets the high-growth "mofa to rera carpet conversion" query. Reuses the conversion relationship documented in `AreaCalculator` and reuses `AreaConverter.scss` for styling. Emits `SoftwareApplication`, `FAQPage`, `HowTo`, and `BreadcrumbList` schema. Cross-linked from `AreaCalculator` to avoid keyword cannibalization.
+Converts between MOFA and RERA carpet area as a **rule-of-thumb estimate** (~6% midpoint of the typical 5–8% gap). RERA carpet (Act 2016 §2(k)) includes internal partition walls that MOFA excluded; both definitions still exclude exclusive balconies, verandahs, and open terraces. Targets the high-growth "mofa to rera carpet conversion" query. Reuses `AreaConverter.scss` for styling. Emits `SoftwareApplication`, `FAQPage`, `HowTo`, and `BreadcrumbList` schema. Cross-linked from `AreaCalculator` to avoid keyword cannibalization.
 
 ### SqFtCalculator (`/sq-ft-calculator`)
 

@@ -67,7 +67,7 @@ if (navigator.modelContext?.registerTool) {
         if (input.purpose) params.set('purpose', input.purpose);
         if (input.price_max) params.set('price_max', String(input.price_max));
         if (input.bedrooms_min) params.set('bedrooms_min', String(input.bedrooms_min));
-        const url = `https://api.360ghar.com/api/v1/properties/?${params.toString()}`;
+        const url = `https://api.360ghar.com/api/v1/properties?${params.toString()}`;
         const res = await fetch(url);
         return res.json();
       },

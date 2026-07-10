@@ -85,10 +85,10 @@ const SECTORS = [
 ];
 
 const RISK_COLOR = {
-  "Low": "#16a34a",
-  "Low-Medium": "#ca8a04",
-  "Medium": "#d97706",
-  "Medium-High": "#dc2626",
+  "Low": 'var(--success-color)',
+  'Low-Medium': 'var(--warning-color)',
+  "Medium": 'var(--warning-color)',
+  "Medium-High": 'var(--danger-color)',
 };
 
 const SCHEMA = {
@@ -185,7 +185,7 @@ export default function BestSectorsInvestment2026() {
       <MobileMenu />
       <main className="body-bg">
         <Header />
-        <div className="geo-page best-sectors-investment" id="main-content">
+        <div className="geo-page best-sectors-investment">
 
 
         {/* Hero */}
@@ -222,7 +222,7 @@ export default function BestSectorsInvestment2026() {
                     </div>
                     <div className="investment-card__metric">
                       <span className="investment-card__metric-label">Expected Returns</span>
-                      <strong style={{ color: "#16a34a" }}>{s.expectedReturn}</strong>
+                      <strong style={{ color: 'var(--success-color)' }}>{s.expectedReturn}</strong>
                     </div>
                     <div className="investment-card__metric">
                       <span className="investment-card__metric-label">Rental Yield</span>
@@ -230,7 +230,7 @@ export default function BestSectorsInvestment2026() {
                     </div>
                     <div className="investment-card__metric">
                       <span className="investment-card__metric-label">Risk Level</span>
-                      <strong style={{ color: RISK_COLOR[s.risk] || "#d97706" }}>{s.risk}</strong>
+                      <strong style={{ color: RISK_COLOR[s.risk] || 'var(--warning-color)' }}>{s.risk}</strong>
                     </div>
                     <div className="investment-card__metric">
                       <span className="investment-card__metric-label">Time Horizon</span>

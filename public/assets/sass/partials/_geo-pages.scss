@@ -1,10 +1,10 @@
 .geo-page {
   font-family: inherit;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .geo-hero {
-  background: linear-gradient(135deg, #0D1B3E 0%, #0891B2 100%);
+  background: linear-gradient(135deg, var(--main-color) 0%, var(--main-color-dark) 100%);
   color: white;
   padding: 3rem 1.5rem 2.5rem;
   text-align: center;
@@ -53,7 +53,7 @@
   margin: 0 auto;
 
   &--alt {
-    background: #f8fafc;
+    background: var(--bg-light);
     max-width: 100%;
     padding: 3rem 1.5rem;
   }
@@ -67,7 +67,7 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    color: #0D1B3E;
+    color: var(--text-primary);
   }
 }
 
@@ -96,7 +96,7 @@
   &__name {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #0D1B3E;
+    color: var(--text-primary);
     margin: 0;
   }
 
@@ -126,10 +126,10 @@
     gap: 2px;
   }
 
-  &__stat-label { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
-  &__stat-value { font-size: 0.95rem; font-weight: 600; color: #1e293b; }
+  &__stat-label { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+  &__stat-value { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
 
-  &__note { font-size: 0.88rem; color: #475569; margin: 0.5rem 0; line-height: 1.5; }
+  &__note { font-size: 0.88rem; color: var(--text-secondary); margin: 0.5rem 0; line-height: 1.5; }
 
   &__areas {
     display: flex;
@@ -140,8 +140,8 @@
 
   &__area-tag {
     font-size: 0.74rem;
-    background: #f1f5f9;
-    color: #475569;
+    background: var(--bg-light);
+    color: var(--text-secondary);
     padding: 0.2rem 0.6rem;
     border-radius: 20px;
   }
@@ -161,7 +161,7 @@
     margin-bottom: 0.5rem;
   }
 
-  &__name { font-size: 1.05rem; font-weight: 700; color: #0D1B3E; margin: 0; }
+  &__name { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0; }
 
   &__score-ring {
     width: 52px;
@@ -187,14 +187,14 @@
 
   &__stats { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
   &__stat { display: flex; flex-direction: column; }
-  &__stat-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; }
+  &__stat-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; }
   &__stat-value { font-size: 0.9rem; font-weight: 700; }
 
-  &__profile { font-size: 0.85rem; color: #475569; margin: 0.5rem 0; }
+  &__profile { font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0; }
 
   &__employers { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.5rem; }
-  &__employers-label { font-size: 0.74rem; color: #94a3b8; width: 100%; }
-  &__employer-tag { font-size: 0.74rem; background: #f1f5f9; color: #475569; padding: 0.2rem 0.6rem; border-radius: 20px; }
+  &__employers-label { font-size: 0.74rem; color: var(--text-secondary); width: 100%; }
+  &__employer-tag { font-size: 0.74rem; background: var(--bg-light); color: var(--text-secondary); padding: 0.2rem 0.6rem; border-radius: 20px; }
 }
 
 .investment-list { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.5rem; }
@@ -208,7 +208,7 @@
   overflow: hidden;
 
   &__rank {
-    background: #0D1B3E;
+    background: var(--text-primary);
     color: white;
     font-size: 1.4rem;
     font-weight: 800;
@@ -230,8 +230,8 @@
     flex-wrap: wrap;
   }
 
-  &__name { font-size: 1.1rem; font-weight: 700; color: #0D1B3E; margin: 0 0 0.25rem; }
-  &__type { font-size: 0.8rem; color: #0891B2; font-weight: 600; }
+  &__name { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem; }
+  &__type { font-size: 0.8rem; color: var(--main-color); font-weight: 600; }
   &__verdict { font-size: 0.9rem; font-weight: 700; white-space: nowrap; }
 
   &__metrics {
@@ -242,17 +242,17 @@
   }
 
   &__metric { display: flex; flex-direction: column; gap: 2px; }
-  &__metric-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
-  &__metric strong { font-size: 0.9rem; color: #1e293b; }
+  &__metric-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+  &__metric strong { font-size: 0.9rem; color: var(--text-primary); }
 
-  &__reason { font-size: 0.88rem; color: #475569; line-height: 1.6; margin: 0; }
+  &__reason { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
 }
 
 .investment-disclaimer {
   font-size: 0.82rem;
-  color: #64748b;
-  background: #f8fafc;
-  border-left: 3px solid #cbd5e1;
+  color: var(--text-secondary);
+  background: var(--bg-light);
+  border-left: 3px solid var(--border-color-light);
   padding: 0.75rem 1rem;
   border-radius: 0 8px 8px 0;
   line-height: 1.5;
@@ -260,7 +260,7 @@
 
 .geo-faq {
   &__item {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border-color-light);
     padding: 0.75rem 0;
 
     &:last-child { border-bottom: none; }
@@ -269,20 +269,20 @@
   &__question {
     font-size: 1rem;
     font-weight: 600;
-    color: #0D1B3E;
+    color: var(--text-primary);
     cursor: pointer;
     list-style: none;
     padding: 0.25rem 0;
 
     &::marker, &::-webkit-details-marker { display: none; }
-    &::before { content: "▸ "; color: #0891B2; }
+    &::before { content: "▸ "; color: var(--main-color); }
   }
 
   details[open] &__question::before { content: "▾ "; }
 
   &__answer {
     font-size: 0.92rem;
-    color: #475569;
+    color: var(--text-secondary);
     line-height: 1.65;
     margin: 0.5rem 0 0 1rem;
     padding-bottom: 0.5rem;
@@ -291,15 +291,14 @@
 
 .geo-disclaimer {
   font-size: 0.8rem;
-  // Use slate-600 (~#475569) for ≥4.5:1 contrast on white (was #94a3b8 ~2.56:1)
-  color: #475569;
+  color: var(--text-secondary);
   text-align: center;
   margin-top: 1.5rem;
   line-height: 1.5;
 }
 
 .geo-cta {
-  background: #0D1B3E;
+  background: var(--text-primary);
   color: white;
   text-align: center;
   padding: 3rem 1.5rem;

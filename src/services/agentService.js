@@ -4,7 +4,7 @@ import api from './api';
 export const agentService = {
   // Get assigned agent for current user
   getAssignedAgent: async () => {
-    const response = await api.get('/agents/assigned/');
+    const response = await api.get('/agents/assigned');
     return response.data;
   },
 };

@@ -44,6 +44,7 @@ const AccountDeletionRequest = () => {
         }
     };
 
+    // Anonymous GDPR form only — authenticated users use the confirmation branch.
     const onFormSubmit = async (e) => {
         e.preventDefault();
         if (submitting) return;
@@ -57,17 +58,25 @@ const AccountDeletionRequest = () => {
                 reason: selectedReason,
                 message: form.elements.message?.value || '',
             };
+            // No backend /account/delete-request — open mailto for GDPR ops.
             await deletionService.submitDeletionRequest(payload);
             setSucceeded(true);
             toast.success(t('deletion.successTitle'), { theme: 'colored' });
         } catch (err) {
             const msg =
-                err?.response?.data?.detail?.message ||
-                err?.response?.data?.detail ||
                 err?.message ||
                 t('deletion.submitError');
             setSubmitError(typeof msg === 'string' ? msg : t('deletion.submitError'));
-            toast.error(t('deletion.submitError'), { theme: 'colored' });
+            if (err?.mailto && typeof window !== 'undefined') {
+                window.location.href = err.mailto;
+            }
+            toast.info(
+                t('deletion.emailSupport', {
+                    defaultValue: `Please email ${deletionService.supportEmail} to complete your request.`,
+                    email: deletionService.supportEmail,
+                }),
+                { theme: 'colored' }
+            );
         } finally {
             setSubmitting(false);
         }
@@ -87,6 +96,7 @@ const AccountDeletionRequest = () => {
             navigate('/');
         } catch (err) {
             const msg =
+                err?.response?.data?.error?.message ||
                 err?.response?.data?.detail?.message ||
                 err?.response?.data?.detail ||
                 err?.message ||

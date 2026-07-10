@@ -57,17 +57,9 @@ export function mapSupabaseAuthError(error, context = 'login') {
       break;
   }
 
-  if (status === 400) return 'Invalid request. Please check your input.';
-  if (status === 401) {
-    return context === 'otp'
-      ? 'Invalid code. Check and try again.'
-      : 'Invalid email/phone or password.';
-  }
-  if (status === 403) return 'Action not allowed.';
-  if (status === 404) return 'Requested resource was not found.';
-  if (status === 429) return 'Too many attempts. Please try again later.';
-  if (status && status >= 500) return 'Server error. Please try again later.';
-
+  // Message heuristics BEFORE bare status codes. GoTrue often returns
+  // status 400 + "Invalid login credentials" with no error `code`; checking
+  // status first would map that to the useless "Invalid request…" string.
   if (isUnverifiedMessage(message)) {
     return 'Please verify your account before signing in. We can send you a new code.';
   }
@@ -88,6 +80,17 @@ export function mapSupabaseAuthError(error, context = 'login') {
   if (message.includes('network')) {
     return 'Network error. Check your connection and try again.';
   }
+
+  if (status === 400) return 'Invalid request. Please check your input.';
+  if (status === 401) {
+    return context === 'otp'
+      ? 'Invalid code. Check and try again.'
+      : 'Invalid email/phone or password.';
+  }
+  if (status === 403) return 'Action not allowed.';
+  if (status === 404) return 'Requested resource was not found.';
+  if (status === 429) return 'Too many attempts. Please try again later.';
+  if (status && status >= 500) return 'Server error. Please try again later.';
 
   return err.message || FALLBACK;
 }

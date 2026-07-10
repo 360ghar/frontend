@@ -571,19 +571,31 @@ export const generatePropertyStructuredData = (property) => ({
     name: siteMetadata.siteName
   },
   category: property.propertyType || 'Apartment',
-  offers: {
-    '@type': 'Offer',
-    url: property.url || `${siteMetadata.siteUrl}/property/${property.id}`,
-    price: property.price || 0,
-    priceCurrency: 'INR',
-    availability: property.available ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-    priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-    seller: {
-      '@type': 'RealEstateAgent',
-      name: siteMetadata.siteName,
-      telephone: siteMetadata.organization.telephone
-    }
-  },
+  offers: (() => {
+    const hasPrice = Number(property.price) > 0;
+    return {
+      '@type': 'Offer',
+      url: property.url || `${siteMetadata.siteUrl}/property/${property.id}`,
+      priceCurrency: 'INR',
+      availability: property.available !== false
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'RealEstateAgent',
+        name: siteMetadata.siteName,
+        telephone: siteMetadata.organization.telephone,
+      },
+      // Google rejects price:0 — omit price and describe when unknown.
+      ...(hasPrice
+        ? {
+            price: property.price,
+            priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split('T')[0],
+          }
+        : { description: 'Contact for price' }),
+    };
+  })(),
   additionalProperty: [
     {
       '@type': 'PropertyValue',

@@ -3,7 +3,7 @@ import { buildPropertySearchParams } from '../utils/propertyFilters';
 
 /**
  * Searches for properties based on filters, location, and cursor pagination.
- * Corresponds to: GET /properties/
+ * Corresponds to: GET /properties
  * NO AUTHENTICATION REQUIRED
  *
  * The backend now returns a uniform cursor-paginated payload:
@@ -18,7 +18,7 @@ import { buildPropertySearchParams } from '../utils/propertyFilters';
  */
 const searchProperties = (filters = {}, cursor = null, limit = 12) => {
   const params = buildPropertySearchParams(filters, cursor, limit);
-  return publicApi.get(`/properties/?${params.toString()}`);
+  return publicApi.get(`/properties?${params.toString()}`);
 };
 
 /**
@@ -41,7 +41,7 @@ const getPropertyById = (propertyId, options = {}) => {
  * @returns {Promise<array>} A list of recommended properties.
  */
 const getRecommendations = (limit = 6) => {
-  return publicApi.get('/properties/recommendations/', { params: { limit } });
+  return publicApi.get('/properties/recommendations', { params: { limit } });
 };
 
 export const propertyAPIService = {

@@ -4,7 +4,7 @@ import { api, publicApi } from './api';
 export const utilityService = {
   // Get all available property amenities and features
   getAmenities: async () => {
-    const response = await api.get('/amenities/');
+    const response = await api.get('/amenities');
     return response.data;
   },
 
@@ -12,7 +12,7 @@ export const utilityService = {
   uploadFile: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post('/upload/', formData, {
+    const response = await api.post('/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -38,7 +38,7 @@ export const utilityService = {
 
   // Report bugs or issues
   reportBug: async (bugData) => {
-    const response = await api.post('/bugs/', bugData);
+    const response = await api.post('/bugs', bugData);
     return response.data;
   },
 

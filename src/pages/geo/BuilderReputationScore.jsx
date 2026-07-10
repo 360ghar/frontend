@@ -95,8 +95,8 @@ const BUILDERS = [
 ];
 
 const STATUS_LABEL = { good: "70+ — Good", average: "40–69 — Average", poor: "Below 40 — Poor" };
-const STATUS_COLOR = { good: "#16a34a", average: "#d97706", poor: "#dc2626" };
-const STATUS_BG    = { good: "#f0fdf4", average: "#fffbeb", poor: "#fef2f2" };
+const STATUS_COLOR = { good: 'var(--success-color)', average: 'var(--warning-color)', poor: 'var(--danger-color)' };
+const STATUS_BG = { good: 'var(--main-color-lighter)', average: 'var(--bg-light)', poor: 'var(--bg-light)' };
 
 const SCHEMA = {
   "@context": "https://schema.org",
@@ -189,7 +189,7 @@ export default function BuilderReputationScore() {
       <MobileMenu />
       <main className="body-bg">
         <Header />
-        <div className="geo-page builder-reputation-score" id="main-content">
+        <div className="geo-page builder-reputation-score">
 
 
         {/* Hero */}
@@ -241,7 +241,7 @@ export default function BuilderReputationScore() {
                   </div>
                   <div className="builder-card__stat">
                     <span className="builder-card__stat-label">Complaints</span>
-                    <span className="builder-card__stat-value" style={{ color: b.complaints > 20 ? "#dc2626" : "inherit" }}>
+                    <span className="builder-card__stat-value" style={{ color: b.complaints > 20 ? 'var(--danger-color)' : 'inherit' }}>
                       {b.complaints}
                     </span>
                   </div>

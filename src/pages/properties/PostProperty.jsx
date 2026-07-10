@@ -14,6 +14,7 @@ import { I18nLink } from '../../i18n/I18nLink';
 import { PROPERTY_TYPE_OPTIONS } from '../../utils/propertyTaxonomy';
 import { propertyService } from '../../services/propertyService';
 import { extractError } from '../../utils/apiError';
+import { mapPostPropertyToCreate } from '../../utils/postPropertyPayload';
 import GooglePlacesInput from '../../common/search/GooglePlacesInput';
 
 const PostPropertyForm = () => {
@@ -22,10 +23,8 @@ const PostPropertyForm = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [globalError, setGlobalError] = useState(null);
 
-    const postPropertyTypeOptions = [
-        ...PROPERTY_TYPE_OPTIONS,
-        { value: 'other', label: t('postProperty.otherType'), labelKey: 'postProperty.otherType' }
-    ];
+    // Backend PropertyType enum — no "other". Map unknown/legacy to apartment.
+    const postPropertyTypeOptions = PROPERTY_TYPE_OPTIONS;
 
     const listingTypeOptions = [
         { value: 'buy', label: t('postProperty.forSale') },
@@ -50,7 +49,9 @@ const PostPropertyForm = () => {
             .required(t('postProperty.validation.locationRequired')),
         property_size: yup.string(),
         budget_range: yup.string(),
-        listing_type: yup.string(),
+        listing_type: yup.string()
+            .oneOf(['buy', 'rent', 'short_stay'])
+            .required(t('postProperty.validation.listingTypeRequired', { defaultValue: 'Listing type is required' })),
         property_description: yup.string(),
         terms_agreement: yup.boolean()
             .oneOf([true], t('postProperty.validation.termsRequired'))
@@ -65,7 +66,7 @@ const PostPropertyForm = () => {
             property_location: '',
             property_size: '',
             budget_range: '',
-            listing_type: '',
+            listing_type: 'rent',
             property_description: '',
             terms_agreement: false
         },
@@ -75,43 +76,26 @@ const PostPropertyForm = () => {
             setGlobalError(null);
 
             try {
-                // CRITICAL FIX (audit 2.5): previously posted to Formspree,
-                // bypassing the property management system. Wire to the app's
-                // own propertyService so listings land in the real pipeline.
-                // TODO(BACKEND): confirm whether a dedicated "lead" or
-                // "owner-inquiry" endpoint is more appropriate than
-                // POST /properties/ for this partial data shape. The current
-                // form captures lead info (name/phone/location/budget) rather
-                // than a full property record.
-                await propertyService.createProperty({
-                    title: `${values.property_type} - ${values.property_location}`,
-                    description: values.property_description || '',
-                    property_type: values.property_type,
-                    listing_type: values.listing_type || 'rent',
-                    location: values.property_location,
-                    // Lead contact info (the backend may move these to a
-                    // separate owner/lead table).
-                    contact_name: values.full_name,
-                    contact_email: values.email,
-                    contact_phone: `+91${values.phone}`,
-                    budget_range: values.budget_range || undefined,
-                    property_size: values.property_size || undefined,
-                    form_type: 'property_posting',
-                });
+                // Map lead form → backend PropertyCreate (snake_case).
+                // Requires auth (POST /properties).
+                const payload = mapPostPropertyToCreate(values);
+                await propertyService.createProperty(payload);
                 setIsSuccess(true);
                 resetForm();
                 toast.success(t('postProperty.submitSuccess'), {
                     theme: 'colored'
                 });
             } catch (err) {
-                // Use extractError to surface the actual backend message
-                // (Pydantic validation lists, FastAPI detail strings, etc.)
-                // instead of a generic toast. The form posts a lead-capture
-                // shape; the backend's property-create endpoint expects a
-                // full Pydantic record and may return 422 with field-level
-                // details — showing those gives the user (and support) a
-                // chance to know which fields are missing.
-                const detail = extractError(err, t('postProperty.submitError'));
+                // Surface backend validation / auth errors clearly.
+                // 401 → user must log in before creating a listing.
+                const status = err?.response?.status;
+                const detail =
+                    status === 401
+                        ? t('postProperty.loginRequired', {
+                              defaultValue:
+                                  'Please log in to post a property listing.',
+                          })
+                        : extractError(err, t('postProperty.submitError'));
                 setGlobalError(detail);
                 toast.error(detail, {
                     theme: 'colored'

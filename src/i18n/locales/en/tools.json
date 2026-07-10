@@ -898,7 +898,9 @@
         "question": "Why does my RERA carpet area look bigger than the MOFA figure in the old brochure?",
         "answer": "This is expected. The same physical flat measures larger under the RERA definition because internal partition walls (which MOFA excluded) are now counted. Exclusive balconies and open terraces are still excluded under both definitions — the difference comes from the internal walls. It is not a change in the flat's size — it is a change in what is measured. Use the converter to translate between the two definitions."
       }
-    }
+    },
+    "explanationMofaLabel": "MOFA carpet area",
+    "explanationReraLabel": "RERA carpet area"
   },
   "sqFtCalculator": {
     "title": "Carpet Area to Sq Ft Calculator – Free Online Tool | 360Ghar",

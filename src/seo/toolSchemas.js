@@ -36,13 +36,19 @@ export const generateToolSchema = (toolNameOrConfig, description, keywords, cate
         inLanguage: ['en-IN', 'hi-IN'],
         downloadUrl,
         featureList: cfg.featureList || cfg.keywords.split(', '),
-        aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: cfg.ratingValue || '4.8',
-            reviewCount: cfg.reviewCount || '150',
-            bestRating: '5',
-            worstRating: '1',
-        },
+        // Only emit AggregateRating when real values are provided — fabricated
+        // 4.8/150 defaults violate Google's Review Snippet spam policies.
+        ...(cfg.ratingValue != null && cfg.reviewCount != null
+            ? {
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: cfg.ratingValue,
+                    reviewCount: cfg.reviewCount,
+                    bestRating: '5',
+                    worstRating: '1',
+                },
+            }
+            : {}),
     };
 };
 

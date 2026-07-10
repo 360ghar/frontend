@@ -228,13 +228,13 @@ export const authService = {
   // Get current user profile. Accepts optional axios request config (e.g. to
   // pass SKIP_AUTH_RETRY for the fresh-sign-in path via syncUserProfile).
   getCurrentUser: async (requestConfig) => {
-    const response = await api.get('/users/profile/', requestConfig);
+    const response = await api.get('/users/profile', requestConfig);
     return response.data;
   },
 
   // Update current user profile
   updateCurrentUser: async (userData) => {
-    const response = await api.put('/users/profile/', userData);
+    const response = await api.put('/users/profile', userData);
     return response.data;
   },
 

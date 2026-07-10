@@ -364,16 +364,13 @@ const useAuthStore = create((set, get) => {
     // tears down the local session. Pass `{ deleteAccount: true }` to also
     // ask the backend to permanently delete the account BEFORE clearing the
     // Supabase session — this matches the new /auth/delete-account flow.
-    posthogService.resetUser();
+    //
+    // Delete must succeed before we clear the local session. If the API fails,
+    // rethrow so the caller can surface the error and the user stays signed in.
     if (options && options.deleteAccount === true) {
-      try {
-        await deletionService.deleteAccountImmediate();
-      } catch (err) {
-        // Best-effort: still proceed with local logout so the user is not
-        // stranded on a page that requires authentication.
-        console.error('[authStore] deleteAccountImmediate failed:', err);
-      }
+      await deletionService.deleteAccountImmediate();
     }
+    posthogService.resetUser();
     // Clear local auth state even if the network sign-out rejects or hangs.
     // Otherwise the cached user survives in localStorage and the next app load
     // rehydrates a "logged-in" UI whose every authenticated request 401s.

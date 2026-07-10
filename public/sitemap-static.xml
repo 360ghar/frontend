@@ -642,6 +642,54 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/builder-reputation" />
   </url>
   <url>
+    <loc>https://360ghar.com/builder-reputation-score</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/builder-reputation-score" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/builder-reputation-score" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/builder-reputation-score" />
+  </url>
+  <url>
+    <loc>https://360ghar.com/hi/builder-reputation-score</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/builder-reputation-score" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/builder-reputation-score" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/builder-reputation-score" />
+  </url>
+  <url>
+    <loc>https://360ghar.com/tenant-demand-heatmap</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/tenant-demand-heatmap" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/tenant-demand-heatmap" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/tenant-demand-heatmap" />
+  </url>
+  <url>
+    <loc>https://360ghar.com/hi/tenant-demand-heatmap</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/tenant-demand-heatmap" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/tenant-demand-heatmap" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/tenant-demand-heatmap" />
+  </url>
+  <url>
+    <loc>https://360ghar.com/best-sectors-investment-2026</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/best-sectors-investment-2026" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/best-sectors-investment-2026" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/best-sectors-investment-2026" />
+  </url>
+  <url>
+    <loc>https://360ghar.com/hi/best-sectors-investment-2026</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/best-sectors-investment-2026" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/best-sectors-investment-2026" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/best-sectors-investment-2026" />
+  </url>
+  <url>
     <loc>https://360ghar.com/vs/nobroker</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

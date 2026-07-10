@@ -152,8 +152,8 @@ const MofaToReraConverter = () => {
                                 {/* Explanation */}
                                 <div className="area-conv-content-section">
                                     <h2>{t('mofaToRera.explanationTitle')}</h2>
-                                    <p><strong>MOFA carpet area:</strong> {t('mofaToRera.explanationMofa')}</p>
-                                    <p><strong>RERA carpet area:</strong> {t('mofaToRera.explanationRera')}</p>
+                                    <p><strong>{t('mofaToRera.explanationMofaLabel')}:</strong> {t('mofaToRera.explanationMofa')}</p>
+                                    <p><strong>{t('mofaToRera.explanationReraLabel')}:</strong> {t('mofaToRera.explanationRera')}</p>
                                     <p>{t('mofaToRera.explanationWhy')}</p>
                                 </div>
 

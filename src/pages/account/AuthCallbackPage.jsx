@@ -5,6 +5,7 @@ import { ensureSupabaseClient } from '../../services/supabaseClient';
 import { useAuthStore } from '../../store';
 import { AUTH_METHODS } from '../../services/lastAuthMethod';
 import PageLoader from '../../common/PageLoader';
+import { mapSupabaseAuthError } from '../../lib/authErrors';
 
 // Only allow same-site, single-leading-slash redirect targets.
 function sanitizeNext(next) {
@@ -69,7 +70,7 @@ const AuthCallbackPage = () => {
         }
 
         navigate(next, { replace: true });
-      } catch {
+      } catch (err) {
         if (sessionEstablished) {
           // The Supabase session was established but the sync/profile step
           // failed. The user is authenticated — navigate to the intended
@@ -78,7 +79,10 @@ const AuthCallbackPage = () => {
           navigate(next, { replace: true });
         } else {
           // The code exchange itself failed — the user is not authenticated.
-          navigate('/login?error=auth', { replace: true });
+          navigate(
+            `/login?error=${encodeURIComponent(mapSupabaseAuthError(err))}`,
+            { replace: true }
+          );
         }
       }
     }

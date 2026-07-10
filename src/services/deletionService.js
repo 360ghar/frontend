@@ -1,37 +1,26 @@
-import { api, publicApi } from './api';
+import { api } from './api';
+import { extractError } from '../utils/apiError';
 
 /**
  * Account deletion / data-erasure service.
  *
- * Two flows are exposed:
+ * Backend contracts (verified):
+ *   POST /auth/delete-account  body: { confirm: true }  → 204 (authenticated)
+ *   DELETE /users/me           → MessageResponse (authenticated)
  *
- *   1. Logged-in user clicks "Delete my account" — we POST `/auth/delete-account`
- *      (authenticated, returns MessageResponse) and let the auth store tear down the local
- *      session. Replaces the older `/account/delete-request/` flow for users
- *      who can prove their identity via the Supabase session.
- *
- *   2. Anonymous / unverified user submits the GDPR request form — kept on
- *      `/account/delete-request/` so we still collect a contact email and
- *      reason for the data-protection team to action.
- *
- * Contract:
- *   POST   /auth/delete-account              -> 200 OK + MessageResponse (auth)
- *   POST   /account/delete-request/          -> create request (auth, best-effort)
- *          body: { email, deletion_type, reason, message }
- *          resp: { id, status, created_at }
- *   GET    /account/delete-request/{id}/status/      -> poll status (public)
- *   POST   /account/delete-request/{id}/cancel/      -> cancel pending request (auth)
- *
- * TODO(BACKEND): confirm the exact FastAPI route names and response shapes with
- * the backend team. If a route does not yet exist, the calls below will 404
- * and the calling UI will surface a clear error to the user instead of silently
- * succeeding via a third party.
+ * There is NO `/account/delete-request/*` route. Anonymous GDPR requests
+ * cannot be stored via API until a dedicated endpoint exists — the UI should
+ * direct users to email support or sign in and use immediate delete.
  */
 
+const SUPPORT_EMAIL = 'privacy@360ghar.com';
+
 export const deletionService = {
+  supportEmail: SUPPORT_EMAIL,
+
   /**
    * Immediate account deletion for an authenticated user.
-   * Backend returns 200 OK with JSON MessageResponse on success.
+   * Backend returns 204 No Content on success.
    * @returns {Promise<void>}
    */
   deleteAccountImmediate: async () => {
@@ -39,35 +28,56 @@ export const deletionService = {
   },
 
   /**
-   * Submit a new account-deletion / data-erasure request.
-   * Uses the authenticated `api` instance so the backend can associate the
-   * request with the logged-in user when available. Anonymous submissions
-   * (GDPR right) still work because email is the primary key.
+   * @deprecated No backend route. Prefer immediate delete when authenticated,
+   * or mailto:privacy@360ghar.com for anonymous GDPR requests.
    * @param {{ email: string, deletion_type: string, reason: string, message?: string }} data
-   * @returns {Promise<{ id: string, status: string, created_at: string }>}
    */
   submitDeletionRequest: async (data) => {
-    const response = await api.post('/account/delete-request/', data);
-    return response.data;
+    const email = (data?.email || '').trim();
+    const subject = encodeURIComponent(
+      `Account deletion request (${data?.deletion_type || 'account'})`
+    );
+    const body = encodeURIComponent(
+      [
+        `Email: ${email}`,
+        `Deletion type: ${data?.deletion_type || ''}`,
+        `Reason: ${data?.reason || ''}`,
+        '',
+        data?.message || '',
+      ].join('\n')
+    );
+    const err = new Error(
+      `Online deletion requests are not available yet. Please email ${SUPPORT_EMAIL} or sign in to delete your account immediately.`
+    );
+    err.code = 'DELETE_REQUEST_UNAVAILABLE';
+    err.mailto = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
+    err.supportEmail = SUPPORT_EMAIL;
+    throw err;
   },
 
   /**
-   * Get the status of an existing deletion request (public, keyed by id).
-   * @param {string} requestId
+   * @deprecated Status polling is unavailable without a backend request id.
    */
-  getDeletionRequestStatus: async (requestId) => {
-    const response = await publicApi.get(`/account/delete-request/${requestId}/status/`);
-    return response.data;
+  getDeletionRequestStatus: async () => {
+    const err = new Error(
+      `Deletion request status is unavailable. Contact ${SUPPORT_EMAIL} if you have an open request.`
+    );
+    err.code = 'DELETE_REQUEST_UNAVAILABLE';
+    throw err;
   },
 
   /**
-   * Cancel a pending deletion request (within the grace period).
-   * @param {string} requestId
+   * @deprecated Cancel is unavailable without a backend request id.
    */
-  cancelDeletionRequest: async (requestId) => {
-    const response = await api.post(`/account/delete-request/${requestId}/cancel/`);
-    return response.data;
+  cancelDeletionRequest: async () => {
+    const err = new Error(
+      `Deletion request cancel is unavailable. Contact ${SUPPORT_EMAIL}.`
+    );
+    err.code = 'DELETE_REQUEST_UNAVAILABLE';
+    throw err;
   },
+
+  extractError,
 };
 
 export default deletionService;

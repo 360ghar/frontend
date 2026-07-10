@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { useI18nNavigate } from '../../i18n/I18nLink';
 import { I18nLink } from '../../i18n/I18nLink';
 import { toast } from 'react-toastify';
 import { useAuthStore } from '../../store';
 import api from '../../services/api';
 import { authService } from '../../services/authService';
-import { mapSupabaseAuthError, UNVERIFIED_ACCOUNT_MESSAGE } from '../../lib/authErrors';
+import { mapSupabaseAuthError, UNVERIFIED_ACCOUNT_MESSAGE, IDENTIFIER_STATUS_UNAVAILABLE_MESSAGE } from '../../lib/authErrors';
 import { getLastAuthMethod, AUTH_METHODS, maskIdentifier } from '../../services/lastAuthMethod';
 import { getRedirectPathForStage, fetchAuthStage } from '../../utils/authStage';
 import useWebOtp from '../../hooks/useWebOtp';
@@ -626,6 +627,8 @@ const LoginFlow = ({
 }) => {
     const { t } = useTranslation(['forms', 'account']);
     const navigate = useI18nNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const oauthErrorShown = useRef(false);
     const { login, error, clearError } = useAuthStore();
 
     const [showPassword, setShowPassword] = useState(false);
@@ -650,6 +653,28 @@ const LoginFlow = ({
     useEffect(() => {
         setLastMethod(getLastAuthMethod());
     }, []);
+
+    // Surface OAuth / callback failures written as ?error= by AuthCallbackPage.
+    // Without this, mapped exchange errors land in the URL and never reach the user.
+    useEffect(() => {
+        if (oauthErrorShown.current) return;
+        const raw = searchParams.get('error');
+        if (!raw) return;
+        oauthErrorShown.current = true;
+        let message = raw;
+        try {
+            message = decodeURIComponent(raw);
+        } catch {
+            /* keep raw */
+        }
+        if (message === 'auth') {
+            message = t('forms:google.failed') || 'Sign-in could not be completed. Please try again.';
+        }
+        toast.error(message, { theme: 'colored' });
+        const next = new URLSearchParams(searchParams);
+        next.delete('error');
+        setSearchParams(next, { replace: true });
+    }, [searchParams, setSearchParams, t]);
     const lastMethodLabel = lastMethod
         ? t('forms:lastUsed.label', { method: t(`forms:lastUsed.${lastMethod.method}`) })
         : '';
@@ -740,19 +765,26 @@ const LoginFlow = ({
         setBusy(true);
         try {
             const status = await authService.checkIdentifierStatus(parsed.value);
-            if (status?.next_step === 'password') {
+            // Never treat a missing status response as signup — that would silently
+            // create accounts when the identifier-status endpoint is unavailable.
+            if (status == null) {
+                setIdentifierError(IDENTIFIER_STATUS_UNAVAILABLE_MESSAGE);
+                return;
+            }
+            if (status.next_step === 'password') {
                 setStep('password');
             } else {
                 // OTP path — new or unverified account. Track whether the account
                 // already has a password; an unknown identifier (has_password
                 // undefined/null) is treated as NO password, so the set-password
                 // step is forced after OTP verification.
-                setHasPassword(status?.has_password === true);
+                setHasPassword(status.has_password === true);
                 // Only create the account on send when the identifier is unknown
                 // (a signup). Existing-but-unverified accounts must not be re-created.
-                const shouldCreateUser = status?.exists !== true;
+                // `status` is a real object here — `exists !== true` means signup.
+                const shouldCreateUser = status.exists !== true;
                 setOtpShouldCreateUser(shouldCreateUser);
-                if (status?.exists && status?.verified === false) {
+                if (status.exists && status.verified === false) {
                     toast.info(UNVERIFIED_ACCOUNT_MESSAGE, { theme: 'colored' });
                 }
                 if (parsed.channel === 'email') {
@@ -764,7 +796,15 @@ const LoginFlow = ({
                 setStep('otp');
             }
         } catch (err) {
-            toast.error(mapSupabaseAuthError(err) || t('forms:otp.sendFailed'), { theme: 'colored' });
+            // Identifier-status / transport failures must not look like OTP send failures.
+            const msg =
+                err?.response?.status >= 500 ||
+                err?.code === 'ERR_NETWORK' ||
+                /network|timeout|unavailable|503|502/i.test(String(err?.message || ''))
+                    ? IDENTIFIER_STATUS_UNAVAILABLE_MESSAGE
+                    : mapSupabaseAuthError(err) || t('forms:otp.sendFailed');
+            setIdentifierError(msg);
+            toast.error(msg, { theme: 'colored' });
         } finally {
             setBusy(false);
         }

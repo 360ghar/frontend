@@ -3,7 +3,7 @@ import api from './api';
 export const propertyService = {
   // Get all properties with optional filters (admin also uses this endpoint with auth)
   getAllProperties: async (filters = {}) => {
-    const response = await api.get('/properties/', { params: filters });
+    const response = await api.get('/properties', { params: filters });
     return response.data;
   },
 
@@ -21,7 +21,7 @@ export const propertyService = {
 
   // Create new property
   createProperty: async (propertyData) => {
-    const response = await api.post('/properties/', propertyData);
+    const response = await api.post('/properties', propertyData);
     return response.data;
   },
 

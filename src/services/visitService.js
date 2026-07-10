@@ -10,11 +10,11 @@ import api from './api';
  */
 export const visitService = {
   schedule: async ({ property_id, scheduled_date, special_requirements }) => {
-    const response = await api.post('/visits/', { property_id, scheduled_date, special_requirements });
+    const response = await api.post('/visits', { property_id, scheduled_date, special_requirements });
     return response.data;
   },
   getAll: async (params = {}) => {
-    const response = await api.get('/visits/', { params });
+    const response = await api.get('/visits', { params });
     return response.data;
   },
   getUpcoming: async (params = {}) => {

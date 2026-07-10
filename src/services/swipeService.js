@@ -4,13 +4,13 @@ import api from './api';
 export const swipeService = {
   // Record a swipe (like/dislike)
   recordSwipe: async ({ property_id, is_liked }) => {
-    const response = await api.post('/swipes/', { property_id, is_liked });
+    const response = await api.post('/swipes', { property_id, is_liked });
     return response.data;
   },
 
   // Get swipe history with optional filters
   getSwipes: async (params = {}) => {
-    const response = await api.get('/swipes/', { params });
+    const response = await api.get('/swipes', { params });
     return response.data;
   },
 

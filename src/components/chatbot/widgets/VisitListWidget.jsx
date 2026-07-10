@@ -10,10 +10,15 @@ function formatDate(dateStr) {
 }
 
 const STATUS_LABELS = {
+  // Current wire values
+  requested: { label: 'Requested', cls: 'chatbot-badge--info' },
+  reschedule_suggested: { label: 'Reschedule suggested', cls: 'chatbot-badge--warning' },
+  // Shared / still-active statuses
   pending: { label: 'Pending', cls: 'chatbot-badge--warning' },
   confirmed: { label: 'Confirmed', cls: 'chatbot-badge--success' },
   completed: { label: 'Completed', cls: 'chatbot-badge--neutral' },
   cancelled: { label: 'Cancelled', cls: 'chatbot-badge--error' },
+  // Legacy fallbacks for cached/old data
   scheduled: { label: 'Scheduled', cls: 'chatbot-badge--info' },
 };
 

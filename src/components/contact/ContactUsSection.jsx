@@ -1,10 +1,13 @@
 import { useForm, ValidationError } from '@formspree/react';
 import { useTranslation, Trans } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { I18nLink } from '../../i18n/I18nLink';
 
 const ContactUsSection = () => {
     const { t } = useTranslation('policies');
+    const [searchParams] = useSearchParams();
     const [state, handleSubmit] = useForm("mwpqglyb");
+    const subjectPrefill = searchParams.get('subject') || '';
 
     if (state.succeeded) {
         return (
@@ -71,6 +74,8 @@ const ContactUsSection = () => {
                                         name="user_subject"
                                         className="common-input"
                                         placeholder={t('contact.subjectPlaceholder')}
+                                        defaultValue={subjectPrefill}
+                                        key={subjectPrefill || 'subject-empty'}
                                     />
                                 </div>
                                 <div className="col-12">
