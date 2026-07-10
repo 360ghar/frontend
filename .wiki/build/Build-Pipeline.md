@@ -1,230 +1,184 @@
 # Build Pipeline
 
-360Ghar's `npm run build` is a production-aware pipeline with 11 stages.
-On non-production builds, API-heavy stages are skipped to keep previews fast;
-production runs include all stages plus IndexNow submission.
+360Ghar has **three build tracks**:
+
+| Track | Command | When | Wall clock target |
+|-------|---------|------|-------------------|
+| **Deploy preview** | `npm run build:preview` (`BUILD_FAST=1`) | Every Netlify deploy preview / branch deploy | few seconds |
+| **Production deploy** | `npm run build:full` (`FULL_BUILD=1`) | GitHub Actions `content-build.yml` | several minutes (Puppeteer + API) |
+| **Content precompute** | `npm run build:content` | Scheduled `precompute-content.yml` | many minutes (API + images) |
+
+Netlify preview builds **do not** install Chrome, scrape competitor sitemaps, crawl the property API, prerender 244 routes, or run heavy Vite plugins. Production deploys are built in GitHub Actions and uploaded via `netlify-cli`. The `precompute-content.yml` job refreshes vendored sitemaps, RSS, localities, and optimized images so those steps can be skipped on fast builds.
 
 ## Key Files
 
 | File | Role |
 |------|------|
-| `package.json` | `build` script orchestrator + `build:*` sub-scripts |
-| `netlify.toml` | Netlify build command, env vars, redirects, headers |
-| `scripts/ingest-gurgaon-entities.mjs` | Stage 1a: fetch external sitemaps |
-| `scripts/merge-entities.mjs` | Stage 1b: merge + dedupe |
-| `scripts/build-localities-json.mjs` | Stage 1c: `localities.json` |
-| `scripts/build-localities-index.mjs` | Stage 1d: `localities-index.json` |
-| `scripts/generate-locality-sitemap.mjs` | Stage 1e + 3: locality sitemap |
-| `scripts/write-ai-discovery.mjs` | Stage 2: AI discovery artifacts |
-| `scripts/generate-sitemaps.mjs` | Stage 3: static + landing sitemaps |
-| `scripts/generate-datahub-sitemap.mjs` | Stage 3: data hub sitemap |
-| `scripts/generate-dynamic-sitemaps.mjs` | Stage 3: property + dynamic sitemaps |
-| `scripts/generate-rss.mjs` | Stage 4: RSS feeds |
-| `scripts/optimize-images.mjs` | Stage 5: AVIF/WebP image variants |
-| `scripts/generate-og-image.mjs` | Stage 6: OG image |
-| `vite.config.js` | Stage 7: Vite production build |
-| `scripts/purge-main-css.mjs` | Stage 8: PurgeCSS on main entry |
-| `scripts/generate-prerender-routes.mjs` | Stage 9a: prerender route manifest |
-| `scripts/fetch-prerender-data.mjs` | Stage 9b: bulk API data bundle |
-| `scripts/prerender-pages.mjs` | Stage 9c: Puppeteer prerendering (concurrent + cached) |
-| `scripts/lib/prerenderCache.mjs` | Stage 9 cache: content-hash HTML cache |
-| `scripts/purge-bootstrap.mjs` | Stage 10: PurgeCSS on Bootstrap |
-| `scripts/indexnow-submit.mjs` | Stage 11: Submit same-host URLs to IndexNow |
+| `scripts/build.mjs` | Orchestrator (fast vs `FULL_BUILD=1`, `SKIP_PRECOMPUTE=1`) |
+| `scripts/build-content.mjs` | Precompute-only orchestrator (no Vite/Puppeteer) |
+| `package.json` | `build`, `build:full`, `build:content`, `build:preview`, sub-scripts |
+| `netlify.toml` | Deploy command = `npm run build:preview`; production builds ignored |
+| `.github/workflows/content-build.yml` | `main` push + nightly full build + Netlify CLI deploy |
+| `.github/workflows/precompute-content.yml` | Nightly content precompute + commit to `main` |
+| `vite.config.js` | Vite build (esbuild minify; `BUILD_FAST` disables PWA/compression) |
+| `scripts/optimize-images.mjs` | WebP/AVIF variants with content-hash manifest |
+| `scripts/prerender-pages.mjs` | Puppeteer prerender (**full build only**) |
+| `scripts/lib/prerenderCache.mjs` | Prerender HTML cache (full build only) |
 
-## The `build` Script
+## Scripts
 
 ```json
-"build": "node scripts/build.mjs"
+"build": "node scripts/build.mjs",
+"build:full": "FULL_BUILD=1 node scripts/build.mjs",
+"build:content": "node scripts/build-content.mjs",
+"build:preview": "BUILD_FAST=1 npm run build:ai-discovery && BUILD_FAST=1 node scripts/generate-og-image.mjs && BUILD_FAST=1 vite build"
 ```
 
-Sub-scripts:
-
-```json
-"build:entities": "node scripts/ingest-gurgaon-entities.mjs && node scripts/merge-entities.mjs && node scripts/build-localities-json.mjs && node scripts/build-localities-index.mjs && node scripts/generate-locality-sitemap.mjs",
-"build:ai-discovery": "node scripts/write-ai-discovery.mjs",
-"build:sitemaps": "node scripts/generate-sitemaps.mjs && node scripts/generate-locality-sitemap.mjs && node scripts/generate-datahub-sitemap.mjs && node scripts/generate-dynamic-sitemaps.mjs",
-"build:rss": "node scripts/generate-rss.mjs",
-"build:images": "node scripts/optimize-images.mjs --quiet",
-"build:prerender": "npm run build:prerender-routes && node scripts/fetch-prerender-data.mjs && node scripts/prerender-pages.mjs",
-"build:prerender-routes": "node scripts/generate-prerender-routes.mjs",
-"build:prerender-data": "node scripts/fetch-prerender-data.mjs",
-"build:indexnow": "node scripts/indexnow-submit.mjs",
-```
-
-## Stages in Order
-
-### 1. Entity Ingestion (`build:entities`)
-
-1. **ingest-gurgaon-entities.mjs** - fetches sitemaps from Magicbricks, SquareYards, NoBroker, CommonFloor; extracts `<loc>` URLs matching `gurgaon|gurugram`; decodes locality/society/project names. Output: `scripts/reports/entity-raw.json`.
-2. **merge-entities.mjs** - dedupes + merges raw entities.
-3. **build-localities-json.mjs** - writes `src/data/localities.json`.
-4. **build-localities-index.mjs** - writes `src/data/localities-index.json` (sorted, slugged).
-5. **generate-locality-sitemap.mjs** - writes `public/sitemap-localities.xml`.
-
-`isPlaceholderName()` filters junk tokens; each entity carries `confidence` and `sourceCoverage`. See [SEO & Programmatic](../features/SEO-Programmatic).
-
-### 2. AI Discovery (`build:ai-discovery`)
-
-**write-ai-discovery.mjs** calls `buildAiDiscoveryArtifacts()` from `src/seo/aiDiscovery.js` and enriches the feed with the top 50 localities + 20 societies from `localities-index.json`. Outputs:
-
-- `public/.well-known/ai.txt`
-- `public/.well-known/api-catalog`
-- `public/llms.txt`
-- `public/llms-full.txt`
-- `public/data/llm-feed.json`
-
-### 3. Sitemap Generation (`build:sitemaps`)
-
-1. **generate-sitemaps.mjs** - `sitemap.xml` (index), `sitemap-static.xml`, `sitemap-landing.xml`. Emits hreflang alternates (`en`, `hi`, `x-default`) for every URL, prunes via `src/data/pseo-prune-list.json`, and supports `SITEMAP_MAX_LANDING_PER_CITY` / `SITEMAP_BATCH` for phased releases.
-2. **generate-locality-sitemap.mjs** - `sitemap-localities.xml` (re-run; idempotent).
-3. **generate-datahub-sitemap.mjs** - `sitemap-datahub.xml`.
-4. **generate-dynamic-sitemaps.mjs** - `sitemap-properties.xml` + any dynamic batches (fetches live properties from the API).
-
-### 4. RSS Generation (`build:rss`)
-
-**generate-rss.mjs** fetches blog posts and properties via `scripts/lib/paginatedApi.mjs`, plus localities from `localities-index.json`. Outputs:
-
-- `public/rss.xml` - main feed (blog + properties)
-- `public/rss/localities.xml` - locality feed
-
-Each item is XML-escaped and dated with `toRfc2822()`.
-
-### 5. Image Optimization (`build:images`)
-
-**optimize-images.mjs** uses `sharp` to generate next-gen variants for every PNG/JPG under `public/assets/images` (above 50KB):
-
-- `<name>.webp` (quality 80)
-- `<name>.avif` (quality 50)
-- For "responsive" hero/banner art, also width-constrained variants at 320 / 640 / 768 / 1024 px in both WebP + AVIF.
-
-Idempotent: outputs are skipped if newer than the source. Flags: `--force` (regenerate all), `--quiet` (summary only).
-
-### 6. OG Image Generation
-
-**generate-og-image.mjs** resizes `public/assets/images/thumbs/banner-three.webp` to 1200x630 JPG (quality 85, progressive) at `public/og-image-home.jpg` for Open Graph / Twitter cards.
-
-### 7. Vite Production Build
-
-`vite build` runs the standard Vite production build (React plugin, SCSS, code-splitting, compression plugin, PWA plugin, bundle visualizer). Output: `dist/`.
-
-### 8. Main CSS Purge
-
-**purge-main-css.mjs** runs PurgeCSS on the main entry CSS chunk (`dist/assets/index-[hash].css`, ~179KB from `main.scss` + component styles). Scans built HTML/JS + source JSX for used selectors, with a safelist for dynamic classes (`show`, `collapsing`, `collapse`, `modal`, etc.). Reduces the entry chunk significantly.
-
-### 9. Prerendering (`build:prerender`)
-
-1. **generate-prerender-routes.mjs** - builds `scripts/prerender-routes.json` from `indexableStaticRoutes`, `seedLandingPrerenderRoutes`, `seedLocalityPrerenderRoutes`, and locality data. Each route has `waitForSelector` / `waitForText` / `waitForTitle`.
-2. **fetch-prerender-data.mjs** - pre-fetches a single bulk bundle of the high-value API payloads (recommendations, default + per-route property searches, blog posts) keyed by the same `buildRequestKey` the SPA adapter uses. Writes `dist/prerender-data.json` = `{ meta, entries: { [requestKey]: payload } }`. During capture the SPA reads from this bundle instead of firing live calls per route, so production prerender no longer hammers the backend with 244 × live requests. In bulk mode, unknown keys fall through to live requests; non-production `empty` mode returns empty payloads. Never fails the build on a network error.
-3. **prerender-pages.mjs** - spawns `vite preview` on `127.0.0.1:4317`, launches headless Puppeteer (`--no-sandbox` on Linux), and renders each route. Optimizations:
-   - **Concurrency** (`PRERENDER_CONCURRENCY`, default 5, clamped 1-8): a bounded worker pool renders multiple routes in parallel against one shared browser (one page per route).
-   - **Content-hash cache** (`PRERENDER_CACHE_DIR`, default `node_modules/.cache/prerender-html`): Netlify persists this across builds. Each route's cache key is sha256 over the vite build hash (`dist/.vite-build-hash`), the bulk-data bundle hash, the route config, and the algorithm source hash. Unchanged routes skip the Puppeteer render and copy cached HTML to `dist/`. Disable with `PRERENDER_CACHE_DISABLED=1`.
-   - **Request interception**: aborts maps/analytics/fonts/service-worker during capture (defense-in-depth alongside the in-app `isPrerendering()` short-circuits).
-   - **Lower timeouts**: per-route wait lowered from 60s to 20s (`waitForText` 10s) so flaky routes fail fast.
-
-   Per route: sets `window.__PRERENDER_INJECTED = { isPrerendering: true }`, navigates, waits for the configured signal, serializes `page.content()` to `dist/<route>.html`, and rewrites stylesheets to be non-blocking.
-
-The `isPrerendering` flag is checked by `authStore.initializeAuth`, `locationStore.initializeLocation`, `posthogService.init`, and `main.jsx` to skip network calls. The bulk-data adapter in `src/services/http.js` (`__PRERENDER_DATA_SOURCE__` define) serves from `dist/prerender-data.json` during production capture; non-production builds use the `'empty'` short-circuit.
-
-### 10. Bootstrap Purge
-
-**purge-bootstrap.mjs** runs PurgeCSS on `public/assets/css/bootstrap.min.css` (~190KB) against built HTML/JS + source JSX, reducing it to ~40-50KB. Safelist preserves dynamically-added classes (`show`, `collapsing`, `collapse`, `modal`, `tooltip`, `popover`, `fade`, `active`, `disabled`, `open`, `btn-`, `form-`, and `col-` responsive variants).
-
-### 11. IndexNow Submission (Production only)
-
-`indexnow-submit.mjs` scans generated `sitemap*.xml` files from `dist/` (fallback: `public/`), extracts same-host URLs, and submits them in batches to `https://api.indexnow.org/IndexNow` after build completion. It deduplicates URLs across all sitemap files and sends the payload fields expected by Bing IndexNow (`host`, `key`, `keyLocation`, `urlList`).
-
-Production builds use the static key `ba96fa507cb7447aa74f5ddd2f516a6d` with its companion file at `public/ba96fa507cb7447aa74f5ddd2f516a6d.txt`.
-- Batch size defaults to `1000` and can be overridden via `INDEXNOW_BATCH_SIZE`.
-- Optional tuning env vars: `INDEXNOW_ENDPOINT`, `INDEXNOW_DRY_RUN`, `INDEXNOW_ENFORCE_SUCCESS`.
-
-## Build Pipeline Diagram
+## Deploy preview path (`BUILD_FAST=1`)
 
 ```mermaid
 flowchart TD
-    S1[1. Entity Ingestion] --> S2[2. AI Discovery]
-    S2 --> S3[3. Sitemaps]
-    S3 --> S4[4. RSS]
-    S4 --> S5[5. Image Optimization]
-    S5 --> S6[6. OG Image]
-    S6 --> S7[7. Vite Build]
-    S7 --> S8[8. Main CSS Purge]
-    S8 --> S9[9. Prerender]
-    S9 --> S10[10. Bootstrap Purge]
-    S10 --> S11[11. IndexNow Submission]
-    S11 --> Dist[dist/ deployed to Netlify]
+  A[ai-discovery] --> B[OG image]
+  B --> C[vite build esbuild]
+  C --> D[dist/]
 ```
 
-## Netlify Deployment
+Steps:
 
-`netlify.toml` config:
+1. `build:ai-discovery` + OG image.
+2. `vite build` — esbuild minify, **no gzip/brotli**, **no PWA**, **no image re-processing**. `BUILD_FAST=1` disables heavy plugins.
+
+**Skipped on deploy preview:** Chrome install, entity scrape, sitemap/RSS generation, image optimization, Puppeteer prerender, CSS purge, IndexNow, PWA, compression.
+
+## Content path (`FULL_BUILD=1`)
+
+```mermaid
+flowchart TD
+  C1[entities scrape] --> C2[sitemaps API + static]
+  C2 --> C3[RSS]
+  C3 --> C4[images + OG]
+  C4 --> C5[vite build]
+  C5 --> C6[CSS purge]
+  C6 --> C7[Chrome install]
+  C7 --> C8[prerender 244 routes]
+  C8 --> C9[bootstrap purge]
+  C9 --> C10[IndexNow]
+  C10 --> Dist[dist/]
+```
+
+Same stages as the historical production pipeline: entities, full sitemaps (including dynamic property crawl), RSS, images, vite, CSS purge, Chrome install, concurrent Puppeteer prerender (~244 routes), IndexNow.
+
+When `SKIP_PRECOMPUTE=1` is set, the entities/sitemaps/RSS/images/OG/AI-discovery steps are skipped and the vendored artifacts from `main` are reused. This is used by the `content-build.yml` push trigger.
+
+### Vendored artifacts
+
+The `precompute-content.yml` job commits these so preview builds and `content-build.yml` push builds can skip regeneration:
+
+- `src/data/localities.json`, `src/data/localities-index.json`
+- `public/sitemap*.xml` (static, landing, localities, datahub, properties, blog, projects)
+- `public/rss.xml`, `public/rss/*`
+- `public/.well-known/ai.txt`, `public/.well-known/api-catalog`
+- `public/llms.txt`, `public/llms-full.txt`, `public/data/llm-feed.json`
+- `public/og-image-home.jpg`
+- `public/assets/images/**/*.webp` and `**/*.avif`
+- `scripts/image-optimization-manifest.json`
+
+### Prerender notes
+
+- Concurrency: `PRERENDER_CONCURRENCY` (default 5, max 8).
+- Cache dir: `PRERENDER_CACHE_DIR` (default `node_modules/.cache/prerender-html`).
+- Cache keys include vite asset hash + bulk-data hash — **any code or live listing change tends to cold-miss**. Do not rely on this cache to make deploys fast; keep prerender off the deploy path instead.
+- Bulk data: `fetch-prerender-data.mjs` → `dist/prerender-data.json`.
+
+## Netlify
 
 ```toml
 [build]
   publish = "dist"
-  command = "npx puppeteer browsers install chrome && npm run build"
+  command = "npm run build:preview"
 
 [build.environment]
-  PUPPETEER_CACHE_DIR = "./node_modules/.cache/puppeteer"
   NODE_VERSION = "20"
   VITE_API_SERVER = "https://api.360ghar.com"
   VITE_API_BASE_URL = "https://api.360ghar.com/api/v1"
-  PRERENDER_CONCURRENCY = "5"
-  PRERENDER_CACHE_DIR = "node_modules/.cache/prerender-html"
+  SKIP_BROTLI = "1"
+
+[context.production]
+  ignore = "echo 'Production built by GitHub Actions' && exit 0"
 ```
 
-Puppeteer's Chrome is installed explicitly before the build so prerendering works in Netlify's CI. Netlify persists `node_modules/.cache` across builds, so the content-hash prerender cache survives deploys and skips unchanged renders. Prerender tuning env vars:
+Netlify only builds **deploy previews** and **branch deploys**. Production deploys are uploaded from GitHub Actions.
 
-| Var | Default | Effect |
-|-----|---------|--------|
-| `PRERENDER_CONCURRENCY` | `5` | Parallel Puppeteer pages (clamped 1-8) |
-| `PRERENDER_CACHE_DIR` | `node_modules/.cache/prerender-html` | Where cached HTML + manifest live |
-| `PRERENDER_CACHE_DISABLED` | unset | `1` forces every route to render |
-| `PRERENDER_DATA_DISABLED` | unset | `1` writes an empty bulk bundle |
-| `VITE_PRERENDER_DATA_SOURCE` | `bulk` (prod) / `empty` (other) | Overrides the SPA adapter data source |
+## GitHub workflows
 
-IndexNow tuning env vars:
+### `.github/workflows/content-build.yml`
 
-| Var | Default | Effect |
-|-----|---------|--------|
-| `INDEXNOW_API_KEY` | `ba96fa507cb7447aa74f5ddd2f516a6d` | API key used in request payload |
-| `INDEXNOW_ENDPOINT` | `https://api.indexnow.org/IndexNow` | Submission endpoint |
-| `INDEXNOW_KEY_LOCATION` | `https://360ghar.com/ba96fa507cb7447aa74f5ddd2f516a6d.txt` | Public key file URL |
-| `INDEXNOW_SOURCE_DIR` | `dist` (fallback `public`) | Directory to parse sitemap files from |
-| `INDEXNOW_BATCH_SIZE` | `1000` | URLs per API payload |
-| `INDEXNOW_DRY_RUN` | `0` | `1` logs submission attempts without network calls |
-| `INDEXNOW_ENFORCE_SUCCESS` | `0` | `1` fails the build on any failed batch |
+- Triggers: `push` to `main`, nightly cron (~00:00 IST), `workflow_dispatch`
+- Runs `npm run build:full` (with `SKIP_PRECOMPUTE=1` on `push` to reuse vendored artifacts)
+- Deploys with `netlify-cli` when secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` are set
 
-Key redirects:
+### `.github/workflows/precompute-content.yml`
 
-- `www.360ghar.com` -> `360ghar.com` (301)
-- trailing-slash normalization (301)
-- `/gurugram/*` -> `/gurgaon/*` (301)
-- `/apartments` -> `/flats` (301, all intents)
-- Hindi equivalents under `/hi/*`
-- SPA catch-all `/*` -> `/index.html` (200)
+- Triggers: nightly cron (~30 minutes before `content-build.yml`), `workflow_dispatch`
+- Runs `npm run build:content` and commits the vendored artifacts to `main` with `[skip ci]`
+- Keeps `public/`, `src/data/`, and `scripts/image-optimization-manifest.json` up to date so preview builds can skip heavy work
 
-Cache headers: hashed JS/CSS/fonts are `immutable` (1 year); images 30 days + `stale-while-revalidate`; HTML uses short browser cache (`max-age=60`) plus a longer CDN edge window (`CDN-Cache-Control max-age=3600` with `stale-while-revalidate`, since Netlify purges the edge on every deploy); service worker never cached. The root `/` advertises AI-discovery `Link` headers (RFC 8288) for `api-catalog`, `service-doc`, `service-meta`, `mcp-server`, `agent-skills`, `llms-txt`, `openid-configuration`.
+## Stage reference (full build)
+
+### 1. Entity Ingestion (`build:entities`)
+
+Scrapes Magicbricks / SquareYards / NoBroker / CommonFloor; writes `localities.json` + index + locality sitemap.
+
+### 2. AI Discovery
+
+`write-ai-discovery.mjs` → `ai.txt`, `api-catalog`, `llms.txt`, `llm-feed.json`.
+
+### 3. Sitemaps
+
+Static, landing, localities, datahub (API), dynamic properties/blog (API).
+
+### 4. RSS
+
+Blog + properties + localities feeds.
+
+### 5. Images
+
+`optimize-images.mjs` — WebP/AVIF (+ responsive widths for heroes). Idempotent.
+
+### 6–7. Vite + CSS purge
+
+esbuild minify; PurgeCSS on entry CSS and Bootstrap.
+
+### 8. Prerender
+
+Route manifest → bulk API data → Puppeteer capture to `dist/**/*.html`.
+
+### 9. IndexNow
+
+Submit same-host sitemap URLs after full build.
 
 ## Edge Functions
 
-Netlify auto-discovers Deno edge functions under `netlify/edge-functions/` (in-file `export const config = { path, excludedPath }`, no `netlify.toml` block needed):
+Unchanged: `netlify/edge-functions/` (`markdown-negotiation.js`, `soft-404-guard.js`). Soft-404 still covers SPA routes that are not prerendered on fast deploys.
 
-- `markdown-negotiation.js` — content negotiation for `/for-ai`.
-- `soft-404-guard.js` — runs on `/*` before the SPA catch-all. Paths that match NONE of the SPA's valid route grammar (static pages, `/property/:id`, `/blog/:slug`, `/project/:slug`, `/policies/:slug`, tools, geo pages, `/:city/:intent/:type` + facet variants, `/localities`, with a tolerated `/hi` locale prefix) are served as HTTP **404** + `X-Robots-Tag: noindex` by fetching static `/404.html` and re-wrapping the body (not `context.rewrite`, which is undocumented and status-200 only). Static assets, `/api/*`, robots/sitemaps/sw, and well-known files pass through (config `excludedPath` + in-handler passthrough). **Fail-open:** any uncaught error logs and continues the request chain so a guard bug cannot 500 the whole site. Verify post-deploy: junk multi-segment URL → 404; `/` and known routes → 200.
+## Why deploys used to take 10+ minutes
 
-> **Head-tag dedup gotcha:** react-helmet-async only *adds* head tags — it never removes static tags authored in `index.html`. So `index.html` must NOT ship static `<meta name="description">`, `<link rel="canonical">`, or hreflang alternates, or they will appear first and shadow the per-page tags the `SEO` component renders via Helmet on every route. `index.html` keeps only OG/Twitter tags as a fallback for non-JS social crawlers.
+1. Production treated every deploy as a full content build.
+2. Chrome + **244 Puppeteer routes** dominated wall time.
+3. API property crawls + competitor entity scrapes added more network minutes.
+4. Vite re-optimized images already processed by Sharp; terser minify was slower than esbuild.
+5. Prerender cache almost always missed (global bulk-data hash + per-deploy asset hash).
 
-## Dependency Constraints
+## Dependency notes
 
-- **ESLint** must stay on major version 9 (`@eslint/js` ^9.39.4). `eslint-plugin-react@7.x` declares `peerDependency: eslint ^2 || ... || ^9` and does not support eslint 10+. Upgrading to eslint 10 causes Netlify `npm install` to fail with `ERESOLVE`.
 - **Node** >= 18 (Netlify pins 20).
-- **Puppeteer** ^24.40.0 (devDependency) for prerendering.
-- **sharp** ^0.34.5 for image optimization.
-- Before upgrading any devDependency to a new major, check peer ranges with `npm info <pkg> peerDependencies`, run `npm install` locally, and run `npm run build && npm run lint`.
+- **Puppeteer** only required for `build:full`.
+- **sharp** for `optimize-images.mjs`.
+- ESLint stays on major 9 (peer constraint with `eslint-plugin-react`).
 
 ## Cross-References
 
-- [SEO & Programmatic](../features/SEO-Programmatic) - what the sitemap/prerender stages produce
-- [Internationalization](../features/Internationalization) - Hindi hreflang twins in sitemaps
-- [Authentication](../features/Authentication) - prerender skips auth init
-- [Analytics](../features/Analytics) - prerender skips PostHog
+- [SEO & Programmatic](../features/SEO-Programmatic)
+- [Internationalization](../features/Internationalization)
+- [Authentication](../features/Authentication) — prerender skips auth init
+- [Analytics](../features/Analytics) — prerender skips PostHog

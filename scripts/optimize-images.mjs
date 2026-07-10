@@ -25,6 +25,7 @@ import sharp from 'sharp';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'node:crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,37 @@ const CONFIG = {
   ],
 };
 
+const MANIFEST_PATH = path.join(rootDir, 'scripts', 'image-optimization-manifest.json');
+
+async function loadManifest() {
+  try {
+    const raw = await fs.readFile(MANIFEST_PATH, 'utf8');
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+async function saveManifest(manifest) {
+  try {
+    await fs.writeFile(MANIFEST_PATH, JSON.stringify(manifest, null, 2), 'utf8');
+  } catch (e) {
+    logErr('Warning: failed to write image optimization manifest:', e.message);
+  }
+}
+
+async function hashFile(filePath) {
+  const hash = crypto.createHash('sha256');
+  try {
+    const buffer = await fs.readFile(filePath);
+    hash.update(buffer);
+  } catch {
+    return null;
+  }
+  return hash.digest('hex');
+}
+
 async function isSharpReady() {
   try {
     await sharp({ create: { width: 1, height: 1, channels: 3, background: '#fff' } })
@@ -102,26 +134,27 @@ async function getImageFiles(dir) {
 }
 
 /**
- * Skip an output if it exists and is newer than the source (unless --force).
+ * Skip an output if the source hash is unchanged and the output exists (unless --force).
  */
-async function shouldSkip(inputPath, outputPath) {
+async function shouldSkip(outputPath, sourceHash, manifestEntry) {
   if (FORCE) return false;
+  if (!sourceHash || !manifestEntry || manifestEntry.hash !== sourceHash) return false;
   try {
-    const [inStat, outStat] = await Promise.all([fs.stat(inputPath), fs.stat(outputPath)]);
-    return outStat.mtime > inStat.mtime;
+    await fs.stat(outputPath);
+    return true;
   } catch {
     return false; // output missing → regenerate
   }
 }
 
-async function ensureWebp(inputPath, outPath) {
-  if (await shouldSkip(inputPath, outPath)) return { skipped: true };
+async function ensureWebp(inputPath, outPath, sourceHash, manifestEntry) {
+  if (await shouldSkip(outPath, sourceHash, manifestEntry)) return { skipped: true };
   await sharp(inputPath).webp({ quality: CONFIG.webpQuality }).toFile(outPath);
   return { skipped: false };
 }
 
-async function ensureAvif(inputPath, outPath) {
-  if (await shouldSkip(inputPath, outPath)) return { skipped: true };
+async function ensureAvif(inputPath, outPath, sourceHash, manifestEntry) {
+  if (await shouldSkip(outPath, sourceHash, manifestEntry)) return { skipped: true };
   // AVIF is slower to encode; cap effort to keep build times sane.
   await sharp(inputPath)
     .avif({ quality: CONFIG.avifQuality, effort: 4 })
@@ -129,18 +162,18 @@ async function ensureAvif(inputPath, outPath) {
   return { skipped: false };
 }
 
-async function ensureResponsive(inputPath, dir, name, ext) {
+async function ensureResponsive(inputPath, dir, name, sourceHash, manifestEntry) {
   const results = [];
   for (const width of CONFIG.responsiveSizes) {
     const base = path.join(dir, `${name}-${width}w`);
     const webpPath = `${base}.webp`;
     const avifPath = `${base}.avif`;
 
-    if (!(await shouldSkip(inputPath, webpPath))) {
+    if (!(await shouldSkip(webpPath, sourceHash, manifestEntry))) {
       await sharp(inputPath).resize({ width, withoutEnlargement: true })
         .webp({ quality: CONFIG.webpQuality }).toFile(webpPath);
     }
-    if (!(await shouldSkip(inputPath, avifPath))) {
+    if (!(await shouldSkip(avifPath, sourceHash, manifestEntry))) {
       await sharp(inputPath).resize({ width, withoutEnlargement: true })
         .avif({ quality: CONFIG.avifQuality, effort: 4 }).toFile(avifPath);
     }
@@ -166,6 +199,7 @@ async function main() {
   const imageFiles = await getImageFiles(CONFIG.inputDir);
   log(`Scanning ${imageFiles.length} images under ${path.relative(rootDir, CONFIG.inputDir)}…`);
 
+  const manifest = await loadManifest();
   const stats = {
     webpCreated: 0, webpSkipped: 0, webpErrors: 0,
     avifCreated: 0, avifSkipped: 0, avifErrors: 0,
@@ -190,10 +224,13 @@ async function main() {
       continue;
     }
 
+    const sourceHash = await hashFile(inputPath);
+    const manifestEntry = manifest[relativePath] || (manifest[relativePath] = {});
+
     // WebP twin
     try {
       const before = await fs.stat(webpPath).then(s => s.size).catch(() => sourceStat.size);
-      const r = await ensureWebp(inputPath, webpPath);
+      const r = await ensureWebp(inputPath, webpPath, sourceHash, manifestEntry);
       if (r.skipped) { stats.webpSkipped++; }
       else {
         stats.webpCreated++;
@@ -208,7 +245,7 @@ async function main() {
 
     // AVIF twin
     try {
-      const r = await ensureAvif(inputPath, avifPath);
+      const r = await ensureAvif(inputPath, avifPath, sourceHash, manifestEntry);
       if (r.skipped) { stats.avifSkipped++; }
       else {
         stats.avifCreated++;
@@ -223,7 +260,7 @@ async function main() {
     // Responsive variants for large art
     if (responsiveSet.has(relativePath)) {
       try {
-        const widths = await ensureResponsive(inputPath, dir, name, ext);
+        const widths = await ensureResponsive(inputPath, dir, name, sourceHash, manifestEntry);
         stats.responsiveImages++;
         stats.responsiveVariants += widths.length;
         log(`  ${relativePath}: responsive ${widths.join('/')}w (webp+avif)`);
@@ -231,7 +268,13 @@ async function main() {
         logErr(`  ERROR responsive ${relativePath}: ${e.message}`);
       }
     }
+
+    if (sourceHash) {
+      manifestEntry.hash = sourceHash;
+    }
   }
+
+  await saveManifest(manifest);
 
   log('\n' + '='.repeat(50));
   log(`Summary:`);

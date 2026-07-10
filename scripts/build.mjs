@@ -1,71 +1,97 @@
 #!/usr/bin/env node
 /**
- * Smart build orchestrator.
+ * Build orchestrator — two tracks:
  *
- * Detects the build context and skips API/backend-calling steps for
- * non-production builds (local dev, Netlify deploy-preview, branch-deploy,
- * dev) to avoid unnecessary load on the backend and database during
- * testing and preview builds.
+ * Deploy path (default, including Netlify production):
+ *   Local/static work only — vite + CSS purge. Target: tens of seconds.
+ *   Skips Chrome, external entity scraping, API sitemap/RSS crawls,
+ *   Puppeteer prerender, and IndexNow.
  *
- * Production build (Netlify CONTEXT=production, or FULL_BUILD=1):
- *   Full pipeline — entities, sitemaps, RSS, images, OG, vite, CSS purge,
- *   prerender (Puppeteer), bootstrap purge, IndexNow submission.
+ * Content / full path (FULL_BUILD=1 only):
+ *   Full SEO pipeline — entities, sitemaps, RSS, images, vite, CSS purge,
+ *   prerender (Puppeteer), IndexNow. Use for scheduled/nightly content
+ *   refreshes or manual SEO rebuilds (`npm run build:full`).
  *
- * Non-production build (everything else):
- *   Fast pipeline — ai-discovery, images, OG, vite, CSS purge, bootstrap
- *   purge. Skips: entities (external scraping), sitemaps (API fetches),
- *   RSS (API fetches), prerender (API data fetch + Puppeteer).
+ * Override: set FULL_BUILD=1 to force the content pipeline anywhere.
  *
- * Override: set FULL_BUILD=1 to force a full build anywhere.
+ * Why production is no longer auto-full:
+ *   Netlify CONTEXT=production previously ran 244 Puppeteer routes + API
+ *   crawls + Chrome install (~10+ minutes). Prerender cache was also cold
+ *   every deploy (global bulk-data hash + vite asset hash). SEO freshness
+ *   is owned by the scheduled content job, not every code deploy.
  */
 import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 
 const cwd = process.cwd();
-
-const isNetlifyProduction =
-  process.env.NETLIFY === 'true' && process.env.CONTEXT === 'production';
-const isFullBuild = process.env.FULL_BUILD === '1' || isNetlifyProduction;
+const isFullBuild = process.env.FULL_BUILD === '1';
+const skipPrecompute = process.env.SKIP_PRECOMPUTE === '1';
 
 function run(cmd) {
   console.log(`\n> ${cmd}`);
-  execSync(cmd, { stdio: 'inherit', cwd });
+  const label = cmd.length > 80 ? `${cmd.slice(0, 77)}...` : cmd;
+  console.time(label);
+  try {
+    execSync(cmd, { stdio: 'inherit', cwd });
+  } finally {
+    console.timeEnd(label);
+  }
 }
 
-// Steps that fetch from the backend / external sources — production only.
-// Each is heavy and makes network/API calls that are wasteful during
-// local testing and Netlify preview/branch deploys.
-const API_DEPENDENT_PRE_VITE = [
-  'npm run build:entities',   // scrapes external sitemaps (magicbricks, nobroker, ...)
-  'npm run build:sitemaps',   // fetches properties, blog, projects, circle rates from API
-  'npm run build:rss',        // fetches blog posts and properties from API
-];
+const LOCALITIES_JSON = path.join(cwd, 'src', 'data', 'localities.json');
+const LOCALITIES_INDEX = path.join(cwd, 'src', 'data', 'localities-index.json');
 
-// Steps that are purely local (no network calls) — always run.
-const LOCAL_PRE_VITE = [
-  'npm run build:ai-discovery',
-  'npm run build:images',
-  'node scripts/generate-og-image.mjs',
-];
+console.log('');
+console.log('=========================================================');
+if (isFullBuild) {
+  console.log(' FULL / content build (FULL_BUILD=1)');
+  if (skipPrecompute) {
+    console.log(' precompute skipped (SKIP_PRECOMPUTE=1) — vite, prerender, IndexNow');
+  } else {
+    console.log(' entities, sitemaps, RSS, images, vite, prerender, IndexNow');
+  }
+} else {
+  console.log(' Fast deploy build (default)');
+  console.log(' Skipping: Chrome, entities scrape, API sitemaps/RSS,');
+  console.log(' prerender (Puppeteer), IndexNow');
+  console.log(' Set FULL_BUILD=1 or run: npm run build:full');
+}
+console.log('=========================================================');
+console.log('');
 
 // ── Pre-vite ───────────────────────────────────────────────────────────
 
 if (isFullBuild) {
-  // Puppeteer Chrome is only needed for prerendering.
-  run('npx puppeteer browsers install chrome');
-  for (const step of API_DEPENDENT_PRE_VITE) run(step);
+  if (!skipPrecompute) {
+    run('npm run build:entities');
+    run('npm run build:sitemaps');
+    run('npm run build:rss');
+    run('npm run build:images');
+  }
 } else {
-  console.log('');
-  console.log('=========================================================');
-  console.log(' Non-production build — skipping API-dependent steps:');
-  console.log('   entities, sitemaps, RSS, prerender');
-  console.log(' (avoids unnecessary backend/database calls during');
-  console.log('  local testing and Netlify preview/branch deploys)');
-  console.log(' Set FULL_BUILD=1 to force a full production build.');
-  console.log('=========================================================');
-  console.log('');
+  // Localities power locality pages + light sitemap gen. Prefer vendored
+  // files in the repo; only scrape if both are missing (fresh clone).
+  if (!existsSync(LOCALITIES_JSON) || !existsSync(LOCALITIES_INDEX)) {
+    console.log('localities data missing — running entity ingestion once');
+    run('npm run build:entities');
+  }
+
+  // Static + locality sitemaps only (no API crawls).
+  // Dynamic/datahub/RSS sitemaps are refreshed on FULL_BUILD.
+  run('node scripts/generate-sitemaps.mjs');
+  if (existsSync(LOCALITIES_INDEX)) {
+    run('node scripts/generate-locality-sitemap.mjs');
+  }
+
+  // Idempotent: no-ops when webp/avif variants are already newer than sources.
+  run('npm run build:images');
 }
 
-for (const step of LOCAL_PRE_VITE) run(step);
+if (!isFullBuild || !skipPrecompute) {
+  run('npm run build:ai-discovery');
+  run('node scripts/generate-og-image.mjs');
+}
 
 // ── Vite build ─────────────────────────────────────────────────────────
 
@@ -78,6 +104,8 @@ run('vite build');
 run('node scripts/purge-main-css.mjs');
 
 if (isFullBuild) {
+  // Puppeteer Chrome is only needed for prerendering.
+  run('npx puppeteer browsers install chrome');
   run('npm run build:prerender');
 }
 
@@ -89,6 +117,6 @@ if (isFullBuild) {
 
 console.log(
   isFullBuild
-    ? '\nFull production build complete.'
-    : '\nFast build complete (skipped API-dependent steps).',
+    ? '\nFull content build complete.'
+    : '\nFast deploy build complete (SEO crawl/prerender skipped).',
 );

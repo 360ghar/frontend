@@ -8,6 +8,8 @@
     "dev": "vite",
     "build": "node scripts/build.mjs",
     "build:full": "FULL_BUILD=1 node scripts/build.mjs",
+    "build:content": "node scripts/build-content.mjs",
+    "build:preview": "BUILD_FAST=1 npm run build:ai-discovery && BUILD_FAST=1 node scripts/generate-og-image.mjs && BUILD_FAST=1 vite build",
     "build:entities": "node scripts/ingest-gurgaon-entities.mjs && node scripts/merge-entities.mjs && node scripts/build-localities-json.mjs && node scripts/build-localities-index.mjs && node scripts/generate-locality-sitemap.mjs",
     "build:images": "node scripts/optimize-images.mjs --quiet",
     "build:ai-discovery": "node scripts/write-ai-discovery.mjs",
@@ -81,10 +83,8 @@
     "sass": "^1.71.1",
     "sharp": "^0.34.5",
     "svgo": "^4.0.1",
-    "terser": "^5.44.1",
     "vite": "^7.3.1",
     "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-image-optimizer": "^2.0.3",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^3.2.4"
   }

@@ -767,9 +767,19 @@ VITE_GOOGLE_PLACES_API_KEY=your_google_places_api_key
 
 ## Deployment & CI
 
-### Netlify Build
-- Netlify runs `npm run build` which triggers entity ingestion, sitemap generation, then Vite build
-- Netlify uses **strict peer dependency resolution** — mismatches that `npm install` tolerates locally will fail CI with `ERESOLVE`
+### Production deploys
+- Production builds run in GitHub Actions (`.github/workflows/content-build.yml`) and are uploaded to Netlify via `netlify-cli deploy --prod`.
+- Netlify's own git-triggered production builds are skipped by `context.production.ignore` in `netlify.toml`.
+- The scheduled `precompute-content.yml` job refreshes vendored sitemaps, RSS, localities, and optimized images and commits them to `main`.
+
+### Deploy previews
+- Netlify runs `npm run build:preview` for deploy previews and branch deploys.
+- `build:preview` uses `BUILD_FAST=1` to disable Vite PWA, compression, and image re-processing, so previews build in seconds.
+
+### Local build
+- `npm run build` runs the default fast path (Vite + CSS purge) without API crawls or prerender.
+- `npm run build:full` runs the full SEO pipeline (entities, sitemaps, RSS, images, Vite, prerender, IndexNow).
+- `npm run build:content` precomputes SEO/content artifacts only.
 
 ### ESLint Version Constraint
 - `eslint` and `@eslint/js` must stay on **major version 9** (`^9.x`)

@@ -38,19 +38,34 @@ current-home-loader.png
 # Source maps in public
 public/assets/css/*.css.map
 
-# Build-generated files
-public/rss/
-public/rss.xml
-public/sitemap*.xml
-public/.well-known/ai.txt
-public/.well-known/api-catalog
-public/llms.txt
-public/llms-full.txt
-public/data/llm-feed.json
+# Build-generated files vendored by the scheduled precompute job.
+# Netlify preview builds reuse these instead of scraping the API.
+# (Do NOT ignore them; they are committed by .github/workflows/precompute-content.yml.)
+# public/sitemap.xml
+# public/sitemap-static.xml
+# public/sitemap-landing.xml
+# public/sitemap-localities.xml
+# public/.well-known/ai.txt
+# public/.well-known/api-catalog
+# public/llms.txt
+# public/llms-full.txt
+# public/data/llm-feed.json
 scripts/prerender-routes.json
 scripts/reports/
-src/data/localities.json
-src/data/localities-index.json
+
+# API-derived sitemaps + RSS are vendored (refreshed by npm run build:full)
+# so fast deploys keep last-known SEO files without re-crawling the API:
+#   public/sitemap-properties.xml
+#   public/sitemap-blog.xml
+#   public/sitemap-projects.xml
+#   public/sitemap-datahub.xml
+#   public/rss.xml
+#   public/rss/
+#
+# Localities data is vendored so fast deploys do not scrape competitors.
+# Refresh with: npm run build:entities (or npm run build:full)
+#   src/data/localities.json
+#   src/data/localities-index.json
 
 # Repomix output
 repomix-output.*

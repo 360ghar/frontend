@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import compression from "vite-plugin-compression";
 import { visualizer } from "rollup-plugin-visualizer";
-import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -96,6 +95,7 @@ const asyncRegisterSW = () => ({
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiServer = env.VITE_API_SERVER || 'https://api.360ghar.com';
+  const isFast = process.env.BUILD_FAST === '1';
 
   // Build-time gate for the prerender data-fetch short-circuit
   // (see src/utils/prerender.js and src/services/http.js).
@@ -126,6 +126,11 @@ export default defineConfig(({ mode }) => {
     __PRERENDER_NO_FETCH__: JSON.stringify(prerenderNoFetch),
     __PRERENDER_DATA_SOURCE__: JSON.stringify(prerenderDataSource),
   },
+  // Applied during transform + minify. Faster than terser; pure marks allow DCE.
+  esbuild: {
+    drop: ["debugger"],
+    pure: ["console.log", "console.debug", "console.info"],
+  },
   plugins: [
     react(),
 
@@ -139,42 +144,31 @@ export default defineConfig(({ mode }) => {
     // Write dist/.vite-build-hash for prerender cache busting
     writeViteBuildHash(),
 
-    // Image optimization
-    ViteImageOptimizer({
-      png: {
-        quality: 80,
-      },
-      jpeg: {
-        quality: 80,
-      },
-      jpg: {
-        quality: 80,
-      },
-      webp: {
-        lossless: false,
-        quality: 80,
-      },
-      avif: {
-        quality: 60,
-      },
-    }),
+    // Image variants (webp/avif/responsive) are produced by
+    // scripts/optimize-images.mjs — not re-processed here (was double work).
 
-    // Generate gzip compressed files
-    compression({
-      algorithm: "gzip",
-      ext: ".gz",
-      threshold: 1024,
-    }),
+    // Generate gzip compressed files (Netlify also compresses at the edge;
+    // pre-compressed assets still help some hosts / direct asset serving).
+    // Skip entirely in fast/preview builds.
+    !isFast &&
+      compression({
+        algorithm: "gzip",
+        ext: ".gz",
+        threshold: 1024,
+      }),
 
-    // Generate brotli compressed files
-    compression({
-      algorithm: "brotliCompress",
-      ext: ".br",
-      threshold: 1024,
-    }),
+    // Brotli pre-compress (skip when SKIP_BROTLI=1 or fast build)
+    !isFast &&
+      process.env.SKIP_BROTLI !== "1" &&
+      compression({
+        algorithm: "brotliCompress",
+        ext: ".br",
+        threshold: 1024,
+      }),
 
-    // PWA support
-    VitePWA({
+    // PWA support (skip for fast/preview builds)
+    !isFast &&
+      VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "assets/images/logo/*.png"],
       manifest: {
@@ -294,14 +288,8 @@ export default defineConfig(({ mode }) => {
       },
     },
 
-    // Minification settings
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        pure_funcs: ['console.log', 'console.debug', 'console.info'],
-        drop_debugger: true,
-      },
-    },
+    // esbuild minify is substantially faster than terser for deploy builds.
+    minify: "esbuild",
   },
 
   server: {
