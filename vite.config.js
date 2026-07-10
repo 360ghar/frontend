@@ -100,18 +100,17 @@ export default defineConfig(({ mode }) => {
   // Build-time gate for the prerender data-fetch short-circuit
   // (see src/utils/prerender.js and src/services/http.js).
   //
-  //   Local build             ->  __PRERENDER_NO_FETCH__ = true   (skip fetches)
-  //   Netlify production      ->  __PRERENDER_NO_FETCH__ = false  (full fetches)
-  //   Netlify deploy-preview  ->  __PRERENDER_NO_FETCH__ = true   (skip fetches)
-  //   Netlify branch-deploy   ->  __PRERENDER_NO_FETCH__ = true   (skip fetches)
-  //   Netlify dev             ->  __PRERENDER_NO_FETCH__ = true   (skip fetches)
+  //   Local / preview builds   ->  __PRERENDER_NO_FETCH__ = true   (skip fetches)
+  //   Production builds        ->  __PRERENDER_NO_FETCH__ = false  (bulk/live fetches)
   //
+  // Netlify sets NETLIFY=true and CONTEXT=production. The GitHub Actions
+  // production workflow sets the same env vars so prerender behaves identically.
   // The short-circuit is AND-gated with the runtime `isPrerendering()` flag,
   // so real users on the deployed site always get live data regardless of
   // the value baked in here.
-  const isNetlifyProduction =
+  const isProductionBuild =
     process.env.NETLIFY === 'true' && process.env.CONTEXT === 'production';
-  const prerenderNoFetch = !isNetlifyProduction;
+  const prerenderNoFetch = !isProductionBuild;
 
   // Bulk-data mode: production builds pre-fetch a /prerender-data.json bundle
   // and serve it from the local preview server during Puppeteer capture, so
@@ -119,7 +118,7 @@ export default defineConfig(({ mode }) => {
   // builds keep the cheaper 'empty' short-circuit. Overridable via env.
   const prerenderDataSource =
     env.VITE_PRERENDER_DATA_SOURCE ||
-    (isNetlifyProduction ? 'bulk' : 'empty');
+    (isProductionBuild ? 'bulk' : 'empty');
 
   return {
   define: {

@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/build.mjs",
-    "build:full": "FULL_BUILD=1 node scripts/build.mjs",
+    "build:full": "FULL_BUILD=1 NETLIFY=true CONTEXT=production node scripts/build.mjs",
     "build:content": "node scripts/build-content.mjs",
     "build:preview": "BUILD_FAST=1 npm run build:ai-discovery && BUILD_FAST=1 node scripts/generate-og-image.mjs && BUILD_FAST=1 vite build",
     "build:entities": "node scripts/ingest-gurgaon-entities.mjs && node scripts/merge-entities.mjs && node scripts/build-localities-json.mjs && node scripts/build-localities-index.mjs && node scripts/generate-locality-sitemap.mjs",

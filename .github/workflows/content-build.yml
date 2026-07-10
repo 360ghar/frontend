@@ -35,6 +35,10 @@ jobs:
       VITE_API_SERVER: https://api.360ghar.com
       VITE_API_BASE_URL: https://api.360ghar.com/api/v1
       SKIP_BROTLI: '1'
+      # Vite uses these to set __PRERENDER_NO_FETCH__=false and __PRERENDER_DATA_SOURCE__=bulk
+      # so the Puppeteer prerender uses pre-fetched bulk data instead of empty payloads.
+      NETLIFY: 'true'
+      CONTEXT: production
       PUPPETEER_CACHE_DIR: ${{ github.workspace }}/node_modules/.cache/puppeteer
       PRERENDER_CACHE_DIR: ${{ github.workspace }}/node_modules/.cache/prerender-html
       PRERENDER_CONCURRENCY: '5'
