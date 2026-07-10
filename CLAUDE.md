@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 - `npm run dev` - Start development server with Vite
-- `npm run build` - Fast local build (Vite + CSS purge; no API crawls or prerender)
+- `npm run build` - Local build (Vite + PWA + compression + CSS purge; no API crawls or prerender)
 - `npm run build:full` - Full production build (entities, sitemaps, RSS, images, Vite, prerender, IndexNow)
 - `npm run build:content` - Precompute SEO/content artifacts (sitemaps, RSS, localities, images, OG, AI discovery)
 - `npm run build:preview` - Fast deploy-preview build (Vite only, no heavy plugins)

@@ -15,7 +15,7 @@
 
 - `npm install` – Install dependencies.
 - `npm run dev` – Start Vite dev server.
-- `npm run build` – Fast local build (Vite + CSS purge; no API crawls or prerender).
+- `npm run build` – Local build (Vite + PWA + compression + CSS purge; no API crawls or prerender).
 - `npm run build:full` – Full production build (entities, sitemaps, RSS, images, Vite, prerender, IndexNow).
 - `npm run build:content` – Precompute SEO/content artifacts (sitemaps, RSS, localities, images, OG, AI discovery).
 - `npm run build:preview` – Fast deploy-preview build (Vite only, no heavy plugins).
