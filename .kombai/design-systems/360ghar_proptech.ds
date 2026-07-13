@@ -1,0 +1,73 @@
+---
+name: 360Ghar PropTech
+modes: [light]
+color:
+  palette:
+    bg-base: "#F8F9FB"
+    surface: "#FFFFFF"
+    ink-primary: "#111827"
+    ink-secondary: "#6B7280"
+    accent-orange: "#FF6B00"
+    success: "#16A34A"
+    charcoal: "#1F2937"
+    glass: "rgba(255, 255, 255, 0.7)"
+  semantic:
+    background.canvas: "{color.palette.bg-base}"
+    surface.default: "{color.palette.surface}"
+    surface.raised: "{color.palette.surface}"
+    text.primary: "{color.palette.ink-primary}"
+    text.secondary: "{color.palette.ink-secondary}"
+    text.tertiary: "#9CA3AF"
+    text.link: "{color.palette.accent-orange}"
+    border.default: "#E5E7EB"
+    border.focus: "{color.palette.accent-orange}"
+    primary.bg: "{color.palette.accent-orange}"
+    primary.fg: "#FFFFFF"
+typography:
+  family: { primary: "Space Grotesk", body: "Inter" }
+  textStyle:
+    display: { fontFamily: "Space Grotesk", fontSize: "56px", fontWeight: 700, lineHeight: 1.1, letterSpacing: "-0.02em" }
+    heading: { fontFamily: "Space Grotesk", fontSize: "32px", fontWeight: 600, lineHeight: 1.2 }
+    body: { fontFamily: "Inter", fontSize: "16px", fontWeight: 400, lineHeight: 1.6 }
+    meta: { fontFamily: "Inter", fontSize: "14px", fontWeight: 500, lineHeight: 1.4 }
+spacing: { xs: "4px", sm: "12px", md: "24px", lg: "48px", xl: "80px" }
+radius: { md: "12px", lg: "24px", xl: "28px", pill: "9999px" }
+shadow:
+  sm: { light: "0 1px 2px rgba(0,0,0,.05)" }
+  md: { light: "0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)" }
+  lg: { light: "0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04)" }
+border:
+  width: { thin: "1px", medium: "2px" }
+  style: { solid: "solid" }
+breakpoint:
+  sm: { px: 640, change: "stack" }
+  md: { px: 768, change: "2-col" }
+  lg: { px: 1024, change: "full" }
+  xl: { px: 1280, change: "max-width" }
+components:
+  prop-button: { type: button, label: "Explore Properties", backgroundColor: "{color.palette.accent-orange}", textColor: "#FFFFFF", typography: "{typography.meta}", rounded: "{radius.pill}", padding: "14px 28px" }
+  glass-card: { type: card, label: "AI Recommendation", backgroundColor: "{color.palette.glass}", backdropFilter: "blur(12px)", rounded: "{radius.lg}", shadow: "{shadow.md}" }
+---
+
+# 360Ghar PropTech — 360ghar_proptech.ds
+
+> A blend of Airbnb + Apple + Arc Browser + Linear. High-precision PropTech aesthetic focused on transparency, AI-depth, and immersive VR.
+
+## Instructions
+- Use `Space Grotesk` for all headlines.
+- Use `Inter` for all body and UI text.
+- Maintain large rounded corners (20-28px) on all containers and cards.
+- Use the brand orange sparingly (max 5%) for high-intent CTAs and functional highlights.
+- Implement soft, layered shadows instead of hard borders or gradients.
+- Backgrounds should be very light gray (`#F8F9FB`) with white surfaces.
+
+## Visual Language
+- **Glassmorphism:** Use floating glass panels for AI insights and search controls.
+- **Micro-interactions:** Magnetic button feels and smooth scroll reveals.
+- **Imagery:** Edge-to-edge, high-resolution architectural photography with subtle parallax.
+
+## Signature
+- Cinematic property video hero with centered AI search.
+- Floating stats with blurred glass backgrounds.
+- Property cards with "AI Match Score" and VR badges.
+- Interactive locality insight charts.

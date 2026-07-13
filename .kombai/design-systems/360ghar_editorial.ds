@@ -1,0 +1,73 @@
+---
+name: 360Ghar Editorial
+modes: [light]
+color:
+  palette:
+    canvas: "#ffffff"
+    ink: "#181616"
+    accent: "#ff6b00"
+    gray-soft: "#f8f8f8"
+    border: "#e0e6ed"
+  semantic:
+    background.canvas: "{color.palette.canvas}"
+    surface.default: "{color.palette.gray-soft}"
+    surface.raised: "#ffffff"
+    text.primary: "{color.palette.ink}"
+    text.secondary: "#777777"
+    text.tertiary: "#999999"
+    text.link: "{color.palette.accent}"
+    border.default: "{color.palette.border}"
+    border.focus: "{color.palette.accent}"
+    primary.bg: "{color.palette.accent}"
+    primary.fg: "#ffffff"
+typography:
+  family: { primary: "Playfair Display", body: "Manrope" }
+  textStyle:
+    display: { fontFamily: "Playfair Display", fontSize: "64px", fontWeight: 700, lineHeight: 1.1, letterSpacing: "-1px" }
+    heading: { fontFamily: "Playfair Display", fontSize: "32px", fontWeight: 600, lineHeight: 1.2 }
+    body: { fontFamily: "Manrope", fontSize: "16px", fontWeight: 400, lineHeight: 1.6 }
+    mono: { fontFamily: "Space Mono", fontSize: "14px", fontWeight: 400, lineHeight: 1.5 }
+spacing: { xs: "4px", sm: "8px", md: "16px", lg: "32px", xl: "64px" }
+radius: { sm: "0px", md: "4px", lg: "8px" }
+shadow:
+  sm: { light: "0 1px 2px rgba(0,0,0,.05)" }
+  md: { light: "0 4px 6px rgba(0,0,0,.05)" }
+border:
+  width: { thin: "1px", medium: "2px" }
+  style: { solid: "solid" }
+breakpoint:
+  sm: { px: 640, change: "stack elements" }
+  md: { px: 768, change: "2-column grid" }
+  lg: { px: 1024, change: "full editorial split" }
+  xl: { px: 1280, change: "wide margins" }
+components:
+  editorial-button: { type: button, label: "View Property", backgroundColor: "{color.palette.ink}", textColor: "#ffffff", typography: "{typography.body}", rounded: "{radius.sm}", padding: "12px 24px" }
+  index-marker: { type: badge, label: "01", backgroundColor: "transparent", textColor: "{color.palette.accent}", typography: "{typography.mono}" }
+---
+
+# 360Ghar Editorial — 360ghar_editorial.ds
+
+> A sophisticated architectural editorial system for premium real estate. Prioritizes professional clarity, whitespace, and high-contrast typography.
+
+## Instructions
+- Use `Playfair Display` for all major headings and display text.
+- Maintain a strict asymmetrical grid with generous whitespace.
+- Use 1px rules in brand orange (`{color.palette.accent}`) as structural dividers.
+- Avoid heavy cards; use depth and rules to separate content blocks.
+
+## Brand & Accent
+- Orange (`{color.palette.accent}`): Precise architectural accent — 1px rules, index markers, small icons.
+
+## Surface
+- Clean white (`{color.palette.canvas}`) for everything. Surface-soft for subtle section shifts.
+
+## Typography
+- Editorial Serif (`Playfair Display`) for headings. Modern Sans (`Manrope`) for UI and body. Monospace for indexing/meta data.
+
+## Layout
+- 50/50 vertical split for hero sections. Asymmetrical masonry for property galleries.
+
+## Signature
+- Asymmetrical "Split Editorial" hero with edge-to-edge high-quality photography.
+- Numbered "Index Grid" for value propositions.
+- Large serif pull-quotes for testimonials.
