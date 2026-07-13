@@ -82,17 +82,17 @@ input[type="button"] {
 
 /* Base Cards */
 .card,
-.common-card,
-.property-item {
+.common-card {
     transition: all 200ms ease !important;
 }
 
 .card:hover,
-.common-card:hover,
-.property-item:hover {
+.common-card:hover {
     box-shadow: var(--shadow-lg) !important;
     transform: translateY(-2px);
 }
+
+/* Property card hover is now handled in the component stylesheet for the branded overlap card. */
 
 .password-toggle-btn {
     background: transparent;

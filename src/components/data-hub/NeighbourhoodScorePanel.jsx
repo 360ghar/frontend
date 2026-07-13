@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ScoreWheel from './ScoreWheel';
 import { dataHubService } from '../../services/dataHubService';
 
@@ -10,13 +10,20 @@ const NeighbourhoodScorePanel = ({ listingId }) => {
 
   useEffect(() => {
     if (!listingId) return;
-    dataHubService.getNeighbourhoodScore(listingId)
-      .then(setScore)
-      .catch(() => setScore(null))
-      .finally(() => setLoading(false));
+    let mounted = true;
+    const fetchScore = async () => {
+      try {
+        const s = await dataHubService.getNeighbourhoodScore(listingId);
+        if (mounted) { setScore(s); setLoading(false); }
+      } catch {
+        if (mounted) { setScore(null); setLoading(false); }
+      }
+    };
+    fetchScore();
+    return () => { mounted = false; };
   }, [listingId]);
 
-  if (loading) return <div style={{ fontSize: 13, color: '#6b7280' }}>Loading neighbourhood score...</div>;
+  if (loading) return <div className="text-muted small">Loading neighbourhood score...</div>;
   if (!score) return null;
 
   const categoryScores = {
@@ -27,9 +34,12 @@ const NeighbourhoodScorePanel = ({ listingId }) => {
   };
 
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16 }}>
-      <h4 style={{ margin: '0 0 12px', fontSize: 14 }}>Neighbourhood Score</h4>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+    <div className="data-hub-card data-hub-card--score">
+      <h4 className="data-hub-card__title">
+        <i className="fas fa-star-half-alt" aria-hidden="true"></i>
+        Neighbourhood Score
+      </h4>
+      <div className="data-hub-card__wheels">
         <ScoreWheel score={score.overall_score ?? 0} size={80} label="Overall" />
         {CATEGORIES.map((cat) => (
           <ScoreWheel key={cat} score={categoryScores[cat] ?? 0} size={60}

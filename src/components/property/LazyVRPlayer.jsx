@@ -4,9 +4,24 @@ import './LazyVRPlayer.scss';
 const LazyVRPlayer = ({ virtualTourUrl, thumbnailUrl, title }) => {
   const [loaded, setLoaded] = useState(false);
 
+  const handleActivate = () => setLoaded(true);
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setLoaded(true);
+    }
+  };
+
   if (!loaded) {
     return (
-      <div className="lazy-vr-player" onClick={() => setLoaded(true)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && setLoaded(true)} aria-label="Click to load 360° virtual tour">
+      <div
+        className="lazy-vr-player"
+        onClick={handleActivate}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label="Click to load 360° virtual tour"
+      >
         {thumbnailUrl ? (
           <img src={thumbnailUrl} alt={title || 'Property'} className="lazy-vr-player__thumb" />
         ) : (

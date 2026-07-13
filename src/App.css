@@ -806,81 +806,67 @@
   display: none !important;
 }
 
-/* Ensure clean white card styling */
+/* Map cards use the modern property card styling; keep only map-specific overrides. */
 .property-item--map {
-  background: #fff !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 8px !important;
+  background: var(--bg-white) !important;
+  border: 1px solid var(--border-color-light) !important;
+  border-radius: 18px !important;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 12px 24px rgba(16, 24, 40, 0.04) !important;
 }
 
 .property-item--map:hover {
-  border-color: #4a90e2 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-  transform: translateY(-2px);
-}
-
-/* Fix text colors explicitly for map cards */
-.property-item--map .property-item__content {
-  background: #fff !important;
-  color: #333 !important;
-}
-
-.property-item--map .property-item__title,
-.property-item--map .property-item__title .link {
-  color: #1a1a1a !important;
-  font-weight: 600 !important;
-}
-
-.property-item--map .property-item__price {
-  color: #1a1a1a !important;
-  font-weight: 700 !important;
-}
-
-.property-item--map .property-item__price .day {
-  color: #666 !important;
-  opacity: 1 !important;
-}
-
-.property-item--map .property-item__location {
-  color: #555 !important;
-  opacity: 1 !important;
-}
-
-.property-item--map .property-item__location .icon {
-  color: #ff6b00 !important;
-}
-
-.property-item--map .amenities-list__item {
-  opacity: 1 !important;
-}
-
-.property-item--map .amenities-list__item .text {
-  color: #555 !important;
-}
-
-.property-item--map .amenities-list__item .icon {
-  color: #ff6b00 !important;
-}
-
-.property-item--map .simple-btn {
-  color: #4a90e2 !important;
-  opacity: 1 !important;
-}
-
-.property-item--map .property-item__bottom {
-  border-top-color: #e5e7eb !important;
-}
-
-.property-item--map .property-item__tags .badge {
-  font-size: 10px;
+  border-color: var(--main-color) !important;
+  box-shadow: 0 16px 32px rgba(255, 107, 0, 0.1) !important;
+  transform: translateY(-3px);
 }
 
 /* Selected state for map cards */
 .property-item--map.selected {
-  border: 2px solid #4a90e2 !important;
-  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15) !important;
+  border: 2px solid var(--main-color) !important;
+  box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.15) !important;
+}
+
+/* Text color overrides for map context */
+.property-item--map .property-item__content {
+  background: var(--bg-white) !important;
+  color: var(--text-primary) !important;
+}
+
+.property-item--map .property-item__title,
+.property-item--map .property-item__title-link {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.property-item--map .property-item__title-link:hover {
+  color: var(--main-color);
+}
+
+.property-item--map .property-item__location {
+  color: var(--text-secondary);
+}
+
+.property-item--map .property-item__location-icon,
+.property-item--map .amenities-list__item .amenities-list__icon {
+  color: var(--main-color) !important;
+}
+
+.property-item--map .amenities-list__item .amenities-list__text {
+  color: var(--text-secondary) !important;
+}
+
+.property-item--map .simple-btn {
+  color: var(--main-color) !important;
+  opacity: 1 !important;
+}
+
+.property-item--map .property-item__bottom {
+  border-top-color: var(--border-color-light) !important;
+}
+
+.property-item--map .property-item__tags .property-item__tag {
+  font-size: 10px;
 }
 
 /* Tighter spacing for map page components */

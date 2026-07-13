@@ -47,6 +47,7 @@ const SEO = ({
   articleTags,
   articleSection,
   video,
+  preloadImages, // array of { href, type } for <link rel="preload" as="image">
 }) => {
   const location = useLocation();
   const rawPath = (location.pathname || '').replace(/\/+$/, '') || '/';
@@ -108,6 +109,18 @@ const SEO = ({
       {/* Alternate languages */}
       {alternates.map((alt) => (
         <link key={alt.hrefLang} rel="alternate" hrefLang={alt.hrefLang} href={alt.href} />
+      ))}
+
+      {/* Preload critical images (LCP) */}
+      {Array.isArray(preloadImages) && preloadImages.map((img, idx) => (
+        <link
+          key={`preload-img-${idx}`}
+          rel="preload"
+          as="image"
+          href={img.href}
+          type={img.type}
+          fetchPriority="high"
+        />
       ))}
 
       {/* Open Graph */}

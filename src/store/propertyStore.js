@@ -283,6 +283,20 @@ const usePropertyStore = create((set, get) => ({
       filtersChanged: true
     }));
   },
+
+  // Hydrate filters from a URL as a complete search state. This must not merge
+  // with the previous in-memory search: a shared link only represents the
+  // filters in its query string, and retaining an old filter changes its
+  // results unexpectedly.
+  replaceFilters: (newFilters = {}) => {
+    set({
+      filters: {
+        ...cloneDefaultPropertyFilters(),
+        ...newFilters,
+      },
+      filtersChanged: true,
+    });
+  },
   
   // Update individual filter
   updateFilter: (key, value) => {

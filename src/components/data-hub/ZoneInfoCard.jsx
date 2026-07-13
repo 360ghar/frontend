@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { I18nLink } from '../../i18n/I18nLink';
 import { dataHubService } from '../../services/dataHubService';
 
@@ -7,31 +7,40 @@ const ZoneInfoCard = ({ sector }) => {
 
   useEffect(() => {
     if (!sector) return;
+    let mounted = true;
     dataHubService.getZoningData({ sector, limit: 1 })
-      .then((data) => setZone(data?.items?.[0] || null))
+      .then((data) => { if (mounted) setZone(data?.items?.[0] || null); })
       .catch(() => {});
+    return () => { mounted = false; };
   }, [sector]);
 
   if (!zone) return null;
 
+  const fields = [
+    ['Land Use', zone.land_use],
+    ['FAR Limit', zone.far],
+    ['Max Height', zone.max_height_m ? `${zone.max_height_m}m` : null],
+    ['Coverage', zone.ground_coverage_pct ? `${zone.ground_coverage_pct}%` : null],
+  ].filter(([, val]) => val);
+
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 16, background: '#f9fafb' }}>
-      <h4 style={{ margin: '0 0 8px', fontSize: 14, color: '#111827' }}>Zone Information</h4>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        {[
-          ['Land Use', zone.land_use],
-          ['FAR Limit', zone.far],
-          ['Max Height', zone.max_height_m ? `${zone.max_height_m}m` : null],
-          ['Coverage', zone.ground_coverage_pct ? `${zone.ground_coverage_pct}%` : null],
-        ].map(([label, val]) => val ? (
-          <div key={label}>
-            <span style={{ fontSize: 11, color: '#6b7280' }}>{label}</span>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, textTransform: 'capitalize' }}>{val}</p>
-          </div>
-        ) : null)}
-      </div>
-      <I18nLink to={`/zone-checker/${zone.slug}`} style={{ fontSize: 12, color: '#2563eb', display: 'block', marginTop: 8 }}>
-        Full zone details →
+    <div className="data-hub-card">
+      <h4 className="data-hub-card__title">
+        <i className="fas fa-map-marked-alt" aria-hidden="true"></i>
+        Zone Information
+      </h4>
+      {fields.length > 0 && (
+        <div className="data-hub-card__grid">
+          {fields.map(([label, val]) => (
+            <div className="data-hub-card__field" key={label}>
+              <span className="data-hub-card__label">{label}</span>
+              <p className="data-hub-card__value">{val}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <I18nLink to={`/zone-checker/${zone.slug}`} className="data-hub-card__link">
+        Full zone details <i className="fas fa-arrow-right" aria-hidden="true"></i>
       </I18nLink>
     </div>
   );

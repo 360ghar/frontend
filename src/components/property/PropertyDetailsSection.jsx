@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useI18nNavigate } from '../../i18n/I18nLink';
+import { useI18nNavigate, I18nLink } from '../../i18n/I18nLink';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
@@ -8,7 +8,6 @@ import { useSwipeable } from 'react-swipeable';
 import PropTypes from 'prop-types';
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
-import CommonSidebar from '../../common/listing/CommonSidebar';
 import { usePropertyStore } from '../../store/propertyStore';
 import { useVisitStore } from '../../store';
 import { useAuthStore } from '../../store';
@@ -18,6 +17,7 @@ import PropertyItem from './PropertyItem';
 import LazyVRPlayer from './LazyVRPlayer';
 import WhatsAppButton from '../ui/WhatsAppButton';
 import LoadingSkeleton from '../ui/LoadingSkeleton';
+import ReraVerifiedBadge from '../data-hub/ReraVerifiedBadge';
 import { propertyAPIService } from '../../services/propertyAPIService';
 import { hapticLight, hapticSuccess } from '../../utils/hapticFeedback';
 import { localInputToServerTimestamp } from '../../utils/dateUtils';
@@ -66,6 +66,50 @@ function getMediaTabDefault(virtualTourUrl, videoUrl, hasPhotos) {
   if (videoUrl) return 'video';
   return 'photos';
 }
+
+const AMENITY_ICON_MAP = {
+  parking: 'fas fa-parking',
+  security: 'fas fa-shield-alt',
+  garden: 'fas fa-tree',
+  gym: 'fas fa-dumbbell',
+  swimming_pool: 'fas fa-swimming-pool',
+  swimmingPool: 'fas fa-swimming-pool',
+  power_backup: 'fas fa-bolt',
+  powerBackup: 'fas fa-bolt',
+  water_supply: 'fas fa-tint',
+  waterSupply: 'fas fa-tint',
+  waste_management: 'fas fa-recycle',
+  wasteManagement: 'fas fa-recycle',
+  intercom: 'fas fa-phone-alt',
+  gas_pipeline: 'fas fa-fire',
+  gasPipeline: 'fas fa-fire',
+  wifi: 'fas fa-wifi',
+  air_conditioning: 'fas fa-snowflake',
+  airConditioning: 'fas fa-snowflake',
+  ro_water_system: 'fas fa-tint',
+  roWaterSystem: 'fas fa-tint',
+  servant_room: 'fas fa-user-friends',
+  servantRoom: 'fas fa-user-friends',
+  study_room: 'fas fa-book',
+  studyRoom: 'fas fa-book',
+  lift: 'fas fa-elevator',
+  elevator: 'fas fa-elevator',
+  cctv: 'fas fa-video',
+  clubhouse: 'fas fa-building',
+  children_play: 'fas fa-child',
+  childrenPlay: 'fas fa-child',
+  jogging_track: 'fas fa-running',
+  joggingTrack: 'fas fa-running',
+  fire_safety: 'fas fa-fire-extinguisher',
+  fireSafety: 'fas fa-fire-extinguisher',
+};
+
+const getAmenityIcon = (key) => AMENITY_ICON_MAP[key] || 'fas fa-check-circle';
+
+const normalizeAmenityKey = (key) => {
+  if (!key) return '';
+  return key.toLowerCase().replace(/[\s-]/g, '_');
+};
 
 const MediaTabButton = ({ active, disabled, onClick, icon, label, count }) => (
   <button
@@ -172,6 +216,14 @@ const PropertyDetailsSection = ({ property }) => {
   ].filter((x) => x.value !== null && x.value !== undefined && x.value !== '');
 
   const features = Array.isArray(property?.features) ? property.features : [];
+  const amenities = useMemo(() => {
+    const raw = Array.isArray(property?.amenities) ? property.amenities : [];
+    return raw.map((a) => {
+      const key = typeof a === 'string' ? normalizeAmenityKey(a) : normalizeAmenityKey(a?.key || a?.name || '');
+      const label = typeof a === 'string' ? a : (a?.label || a?.name || a?.key || '');
+      return { key, label, icon: getAmenityIcon(key) };
+    });
+  }, [property?.amenities]);
   const listingPreferences = property?.listing_preferences || {};
   const propertyTypeLabel = getPropertyTypeLabel(property?.property_type, t);
   const listingLabel = getListingLabel({
@@ -269,14 +321,16 @@ const PropertyDetailsSection = ({ property }) => {
   const [similarProperties, setSimilarProperties] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
 
-  // Fetch similar properties
+  // Fetch similar properties — with AbortController so navigating to a
+  // different property cancels the in-flight request instead of overwriting
+  // the new page's similar list with stale data.
   useEffect(() => {
+    const controller = new AbortController();
     const fetchSimilarProperties = async () => {
       if (!property?.id) return;
-      
+
       setLoadingSimilar(true);
       try {
-        // Build filter criteria based on current property
         const filters = {
           locality: property.locality,
           city: property.city,
@@ -284,28 +338,28 @@ const PropertyDetailsSection = ({ property }) => {
           property_type: property.property_type,
           limit: 4
         };
-        
-        // Add price range (±20% of current property price)
+
         if (property.base_price) {
           const priceBuffer = property.base_price * 0.2;
           filters.price_min = Math.max(0, property.base_price - priceBuffer);
           filters.price_max = property.base_price + priceBuffer;
         }
-        
+
         const response = await propertyAPIService.searchProperties(filters, null, 4);
+        if (controller.signal.aborted) return;
         const properties = Array.isArray(response.data?.items) ? response.data.items : [];
-        
-        // Filter out the current property
         const filtered = properties.filter(p => p.id !== property.id).slice(0, 4);
         setSimilarProperties(filtered);
       } catch (error) {
+        if (error?.name === 'CanceledError' || controller.signal.aborted) return;
         console.error('Error fetching similar properties:', error);
       } finally {
-        setLoadingSimilar(false);
+        if (!controller.signal.aborted) setLoadingSimilar(false);
       }
     };
-    
+
     fetchSimilarProperties();
+    return () => controller.abort();
   }, [property?.id, property?.locality, property?.city, property?.purpose, property?.property_type, property?.base_price]);
 
   const lightboxSlides = useMemo(() =>
@@ -351,30 +405,6 @@ const PropertyDetailsSection = ({ property }) => {
     swipeDuration: 500,
     preventScrollOnSwipe: false,
   });
-
-  const preloadLinks = useMemo(() => {
-    const links = [];
-    if (galleryImages.length > 0) {
-      for (let i = 1; i <= 2; i++) {
-        if (i < galleryImages.length && galleryImages[i]?.image_url) {
-          const url = galleryImages[i].image_url;
-          // Detect MIME type from URL extension
-          const ext = url?.split('?')[0]?.split('#')[0]?.split('.')?.pop()?.toLowerCase();
-          const mime = ext === 'webp' ? 'image/webp' : ext === 'png' ? 'image/png' : 'image/jpeg';
-          links.push(
-            <link
-              key={`preload-next-${i}`}
-              rel="preload"
-              as="image"
-              href={url}
-              type={mime}
-            />
-          );
-        }
-      }
-    }
-    return links;
-  }, [galleryImages]);
 
   if (!property) return null;
 
@@ -516,11 +546,16 @@ const PropertyDetailsSection = ({ property }) => {
 
   return (
     <>
-      {preloadLinks}
       <section className="property-details compact padding-y-60">
         <div className="container container-two">
           <div className="row gy-4">
             <div className="col-lg-8">
+              {/* Back to listings */}
+              <I18nLink to="/property" className="back-to-listings">
+                <i className="fas fa-arrow-left" aria-hidden="true"></i>
+                {t('listing.browseListings', 'Back to Listings')}
+              </I18nLink>
+
               {/* Media Tabs */}
               <div className="media-tabs-container mb-2">
                 <div className="media-tabs d-flex align-items-center gap-2 flex-wrap">
@@ -718,19 +753,31 @@ const PropertyDetailsSection = ({ property }) => {
                 />
               </div>
 
-              <h1 className="property-details__title mt-3 mb-1">{title}</h1>
-              <h5 className="property-details__price mb-2">
-                {price} <span className="day">{day}</span>
-              </h5>
-              <div className="property-trust-strip d-flex flex-wrap gap-2 mb-3">
+              {/* Property Header */}
+              <div className="property-header">
+                <div className="property-header__top">
+                  <div>
+                    <h1 className="property-header__title">{title}</h1>
+                    {address && (
+                      <div className="property-header__address">
+                        <i className="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        {address}
+                      </div>
+                    )}
+                  </div>
+                  <h5 className="property-header__price">
+                    {price} <span className="day">{day}</span>
+                  </h5>
+                </div>
+              </div>
+
+              <div className="property-trust-strip">
                 {property?.is_verified && <span className="badge bg-success">{t('details.verifiedListing')}</span>}
+                {property?.rera_number && <ReraVerifiedBadge reraNumber={property.rera_number} small />}
                 {property?.id && <span className="badge bg-light text-dark border">ID: {property.id}</span>}
                 {property?.updated_at && <span className="badge bg-light text-dark border">{t('details.updated')}: {formatDate(property.updated_at)}</span>}
               </div>
-              {/* AUDIT FIX (UX 2.11): removed the duplicate mobile-only owner
-                  box. The sidebar owner card (visible on all breakpoints) and
-                  the mobile sticky bar already expose owner name, Call,
-                  WhatsApp and Callback, so the extra mobile box was redundant. */}
+
               {/* Description */}
               {description && <p className="property-details__desc mb-3">{description}</p>}
 
@@ -837,6 +884,25 @@ const PropertyDetailsSection = ({ property }) => {
                   </div>
                 )}
 
+                {amenities.length > 0 && (
+                  <div className="property-details-item">
+                    <h6 className="property-details-item__title">
+                      <i className="fas fa-th-large me-2" aria-hidden="true"></i>
+                      {t('filters.amenities', 'Amenities')}
+                    </h6>
+                    <div className="property-details-item__content">
+                      <div className="amenities-grid">
+                        {amenities.map((a, idx) => (
+                          <div className="amenities-grid__item" key={idx}>
+                            <i className={a.icon} aria-hidden="true"></i>
+                            <span>{a.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="property-details-item">
                   <h6 className="property-details-item__title">{t('details.address')}</h6>
                   <div className="property-details-item__content">
@@ -918,11 +984,11 @@ const PropertyDetailsSection = ({ property }) => {
                           <PropertyItem
                             key={similarProperty.id || index}
                             property={similarProperty}
-                            itemClass="style-two style-shaped"
-                            btnClass="text-gradient fw-semibold"
+                            itemClass="style-two"
+                            btnClass="btn-outline-main fw-semibold"
                             badgeText={similarProperty.status || "For Sale"}
                             badgeClass="property-item__badge"
-                            iconsClass="text-gradient"
+                            iconsClass="text-main"
                             btnRenderBottom={true}
                             btnRenderRight={false}
                           />
@@ -963,18 +1029,16 @@ const PropertyDetailsSection = ({ property }) => {
                       </div>
                     )}
 
-                    <div className="row g-2 mb-2">
+                    <div className="sidebar-stat-grid">
                       {previewStats.slice(0, 6).map((s, i) => (
-                        <div className="col-6" key={i}>
-                          <div className="d-flex align-items-center gap-2 small">
-                            <span className="text-muted">{s.icon}</span>
-                            <span>{s.value}</span>
-                          </div>
+                        <div className="sidebar-stat-grid__item" key={i}>
+                          {s.icon}
+                          <span>{s.value}</span>
                         </div>
                       ))}
                     </div>
 
-                    <div className="d-flex flex-wrap gap-2 mb-3">
+                    <div className="sidebar-badge-row">
                       {property.price_per_sqft && (
                         <span className="badge bg-light text-dark border">₹{formatNumber(property.price_per_sqft)}/sqft</span>
                       )}
@@ -1132,10 +1196,6 @@ const PropertyDetailsSection = ({ property }) => {
                     </form>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-3">
-                <CommonSidebar renderSearch={false} renderProperties={true} renderTags={false} />
               </div>
             </div>
           </div>

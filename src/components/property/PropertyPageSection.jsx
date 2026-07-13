@@ -21,7 +21,7 @@ const PropertyPageSection = () => {
     const [searchParams] = useSearchParams();
     const navigate = useI18nNavigate();
     const {
-        updateFilter,
+        replaceFilters,
         filters,
         getActiveFiltersCount,
         clearFilters,
@@ -109,17 +109,16 @@ const PropertyPageSection = () => {
             };
         }
 
-        if (Object.keys(urlFilters).length > 0) {
-            Object.entries(urlFilters).forEach(([key, value]) => {
-                updateFilter(key, value);
-            });
-        }
+        // A URL is the source of truth for a public property search. Replacing
+        // the filter state prevents filters from a prior search surviving when
+        // the user opens a shared link or uses browser navigation.
+        replaceFilters(urlFilters);
 
         if (locationUpdate) {
             setLocation(locationUpdate);
         }
 
-    }, [searchParams, setLocation, updateFilter]);
+    }, [searchParams, setLocation, replaceFilters]);
 
     // Construct a safe cache key object containing only active filters
     const activeFiltersParams = useMemo(() => {
@@ -393,12 +392,12 @@ const PropertyPageSection = () => {
                                     visibleProperties.map((property, index) => (
                                         <div className="property-grid__item" key={property.id || index}>
                                             <PropertyItem
-                                                itemClass="style-two style-shaped compact-card"
-                                                btnClass="text-gradient fw-semibold"
+                                                itemClass="style-two"
+                                                btnClass="btn-outline-main fw-semibold"
                                                 property={property}
                                                 badgeText={property.status || "For Sale"}
                                                 badgeClass="property-item__badge"
-                                                iconsClass="text-gradient"
+                                                iconsClass="text-main"
                                                 btnRenderBottom={true}
                                                 btnRenderRight={false}
                                             />

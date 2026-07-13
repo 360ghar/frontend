@@ -287,7 +287,7 @@ export default function TenantDemandHeatmap() {
         <section className="geo-cta">
           <h2 className="geo-cta__title">Ready to Invest in a High-Demand Area?</h2>
           <p className="geo-cta__sub">
-            Browse verified properties in Gurugram's top-demand localities with 360° virtual tours.
+            Browse verified properties in Gurugram&apos;s top-demand localities with 360° virtual tours.
           </p>
           <div className="geo-cta__buttons">
             <I18nLink to="/properties" className="geo-btn geo-btn--primary">Search Properties</I18nLink>

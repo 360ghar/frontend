@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import Header from '../../common/layout/Header';
 import Footer from '../../common/layout/Footer';
 import MobileMenu from '../../common/layout/MobileMenu';
@@ -174,6 +174,20 @@ const PropertyDetails = () => {
 
     const mainImage = (Array.isArray(propertyData?.images) && propertyData.images[0]?.image_url) || siteMetadata.defaultOgImage;
 
+    // Preload the first 2 gallery images for faster LCP
+    const propertyImages = propertyData?.images;
+    const preloadImages = useMemo(() => {
+        if (!Array.isArray(propertyImages)) return [];
+        return propertyImages
+            .filter((img) => img?.image_url && !/kuula\.co/i.test(img.image_url))
+            .slice(0, 2)
+            .map((img) => {
+                const ext = img.image_url?.split('?')[0]?.split('#')[0]?.split('.')?.pop()?.toLowerCase();
+                const mime = ext === 'webp' ? 'image/webp' : ext === 'png' ? 'image/png' : 'image/jpeg';
+                return { href: img.image_url, type: mime };
+            });
+    }, [propertyImages]);
+
     const isNotFound = !isLoading && (!propertyData || error);
 
     return (
@@ -194,6 +208,7 @@ const PropertyDetails = () => {
                 video={propertyData?.virtual_tour_url || propertyData?.tour_url || undefined}
                 structuredData={generatePropertyStructured()}
                 noindex={isNotFound}
+                preloadImages={preloadImages}
             />
             <main className="body-bg">
                 <OffCanvas />
@@ -283,7 +298,7 @@ const PropertyDetails = () => {
                         {/* Data Hub panels */}
                         <section className="padding-y-40">
                             <div className="container container-two">
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div className="d-flex flex-column gap-2">
                                     {propertyData.rera_number && (
                                         <div>
                                             <ReraVerifiedBadge reraNumber={propertyData.rera_number} />

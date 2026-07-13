@@ -14,7 +14,7 @@ const PropertyTwo = ({
     showTabs = true,
     maxItems = 6,
     gridItemClass = 'col-lg-4 col-sm-6',
-    propertyItemClass = 'style-two style-shaped compact-card',
+    propertyItemClass = 'style-two',
     showFeatureBadges = true
 }) => {
     const {
@@ -59,11 +59,11 @@ const PropertyTwo = ({
             <div className={gridItemClass} key={property.id || index}>
                 <PropertyItem
                     itemClass={propertyItemClass}
-                    btnClass="text-gradient fw-semibold"
+                    btnClass="btn-outline-main fw-semibold"
                     property={property}
                     badgeText={property.status || "For Sale"}
                     badgeClass="property-item__badge"
-                    iconsClass="text-gradient"
+                    iconsClass="text-main"
                     btnRenderBottom={true}
                     btnRenderRight={false}
                     showFeatureBadges={showFeatureBadges}

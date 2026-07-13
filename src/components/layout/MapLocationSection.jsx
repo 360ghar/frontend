@@ -572,8 +572,8 @@ const MapLocationSection = () => {
                                                         >
                                                             <PropertyItem
                                                                 property={property}
-                                                                itemClass={`property-item--list property-item--map ${selectedProperty?.id === property.id ? 'selected' : ''}`}
-                                                                iconsClass="text-gradient"
+                                                                itemClass={`property-item--map ${selectedProperty?.id === property.id ? 'selected' : ''}`}
+                                                                iconsClass="text-main"
                                                                 btnClass="btn-main"
                                                                 badgeText={selectedProperty?.id === property.id ? "Selected" : index < 3 ? "Featured" : ""}
                                                                 badgeClass={`property-item__badge ${selectedProperty?.id === property.id ? 'bg-success' : ''}`}

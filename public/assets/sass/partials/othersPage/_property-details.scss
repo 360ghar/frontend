@@ -39,7 +39,7 @@
         height: 60px;
         border-radius: 5px;
         background-color: hsl(var(--section-bg));
-        color: hsl(var(--main-color));
+        color: var(--main-color);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -118,7 +118,7 @@
         .price-amount {
             font-size: 1.75rem;
             font-weight: 700;
-            color: hsl(var(--main-color));
+            color: var(--main-color);
             line-height: 1.2;
 
             @include sm-screen {
@@ -166,16 +166,16 @@
 
 .btn-teal {
     min-height: 48px;
-    background-color: hsl(var(--main-color));
-    border-color: hsl(var(--main-color));
+    background-color: var(--main-color);
+    border-color: var(--main-color);
     color: hsl(var(--white));
     transition: all 0.2s ease;
 
     &:hover:not(:disabled) {
-        background-color: hsl(var(--main));
-        border-color: hsl(var(--main));
+        background-color: var(--main-color-dark);
+        border-color: var(--main-color-dark);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px hsl(var(--main-color) / 0.3);
+        box-shadow: 0 4px 12px hsl(var(--main) / 0.3);
     }
 }
 
@@ -184,8 +184,8 @@
     min-height: 44px;
 
     &:focus {
-        border-color: hsl(var(--main-color));
-        box-shadow: 0 0 0 0.25rem hsl(var(--main-color) / 0.15);
+        border-color: var(--main-color);
+        box-shadow: 0 0 0 0.25rem hsl(var(--main) / 0.15);
     }
 }
 
@@ -267,9 +267,9 @@
     }
 
     &.active {
-        background-color: hsl(var(--main-color));
+        background-color: var(--main-color);
         color: hsl(var(--white));
-        border-color: hsl(var(--main-color));
+        border-color: var(--main-color);
     }
     
     &:disabled {
@@ -289,8 +289,8 @@
         .icon {
             width: 20px;
             height: 20px;
-            background-color: hsl(var(--main-color) / 0.1);
-            color: hsl(var(--main-color));
+            background-color: hsl(var(--main) / 0.1);
+            color: var(--main-color);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -368,3 +368,279 @@
     }
 }
 /* ====================== Property Skeleton Shimmer End ================= */
+
+/* ====================== Data-Hub Cards Start ================= */
+/* Unified card pattern for RERA, Circle Rate, Zone, Neighbourhood Score */
+.data-hub-card {
+    background: #fff;
+    border: 1px solid var(--border-color-light, #e0e6ed);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 107, 0, 0.08);
+    }
+
+    &__title {
+        margin: 0 0 10px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text-primary, #181616);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        i {
+            color: var(--main-color, #ff6b00);
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__label {
+        font-size: 0.6875rem;
+        color: var(--text-muted, #6b7385);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    &__value {
+        margin: 0;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text-primary, #181616);
+        text-transform: capitalize;
+    }
+
+    &__link {
+        font-size: 0.75rem;
+        color: var(--cta-color, #0369A1);
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 8px;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    /* Banner variant (Circle Rate) */
+    &--banner {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.8125rem;
+
+        .data-hub-card__rate {
+            font-weight: 700;
+            color: #1e40af;
+        }
+    }
+
+    /* Score wheel row */
+    &--score {
+        .data-hub-card__wheels {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+    }
+}
+
+/* RERA badge — themed */
+.rera-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+
+    &__number {
+        font-weight: 400;
+        margin-left: 4px;
+    }
+}
+/* ====================== Data-Hub Cards End ================= */
+
+/* ====================== Property Header Start ================= */
+.property-header {
+    margin-bottom: 20px;
+
+    &__top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    &__title {
+        font-family: var(--heading-font);
+        font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+        font-weight: 700;
+        color: var(--text-primary, #181616);
+        line-height: 1.25;
+        margin: 0 0 6px;
+    }
+
+    &__price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--main-color, #ff6b00);
+        line-height: 1.2;
+        margin: 0 0 8px;
+
+        .day {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: var(--text-muted, #6b7385);
+        }
+    }
+
+    &__address {
+        font-size: 0.875rem;
+        color: var(--text-muted, #6b7385);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        i {
+            color: var(--main-color, #ff6b00);
+        }
+    }
+}
+
+.property-trust-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    .badge {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        padding: 5px 10px;
+        border-radius: 6px;
+    }
+}
+
+.back-to-listings {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted, #6b7385);
+    text-decoration: none;
+    margin-bottom: 16px;
+    transition: color 0.2s ease;
+
+    &:hover {
+        color: var(--main-color, #ff6b00);
+    }
+
+    i {
+        font-size: 0.75rem;
+    }
+}
+/* ====================== Property Header End ================= */
+
+/* ====================== Amenities Grid Start ================= */
+.amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: var(--bg-light, #f8f8f8);
+        border-radius: 8px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--text-primary, #181616);
+
+        i {
+            color: var(--main-color, #ff6b00);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+    }
+}
+/* ====================== Amenities Grid End ================= */
+
+/* ====================== Summary Sidebar Enhancements Start ================= */
+.summary-card {
+    .sidebar-cta-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .sidebar-stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        &__item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8125rem;
+
+            i {
+                color: var(--text-muted, #6b7385);
+                width: 16px;
+                text-align: center;
+            }
+
+            span:last-child {
+                font-weight: 600;
+                color: var(--text-primary, #181616);
+            }
+        }
+    }
+
+    .sidebar-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 14px;
+
+        .badge {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            padding: 4px 8px;
+        }
+    }
+}
+/* ====================== Summary Sidebar Enhancements End ================= */

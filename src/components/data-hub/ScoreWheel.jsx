@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Animated circular score wheel (0-100).
  * Colors: green ≥70, amber 40-69, red <40
@@ -10,11 +8,12 @@ const ScoreWheel = ({ score = 0, size = 120, label = 'Score' }) => {
   const pct = Math.min(Math.max(score, 0), 100);
   const strokeDashoffset = circumference - (pct / 100) * circumference;
   const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f59e0b' : '#ef4444';
+  const trackColor = '#e5e7eb';
 
   return (
     <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
-      <svg width={size} height={size}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e5e7eb" strokeWidth={8} />
+      <svg width={size} height={size} role="img" aria-label={`${label}: ${pct} out of 100`}>
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={trackColor} strokeWidth={8} />
         <circle
           cx={size / 2} cy={size / 2} r={radius}
           fill="none" stroke={color} strokeWidth={8}
@@ -29,7 +28,7 @@ const ScoreWheel = ({ score = 0, size = 120, label = 'Score' }) => {
           {pct}
         </text>
       </svg>
-      <span style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>{label}</span>
+      <span style={{ fontSize: 12, color: 'var(--text-muted, #6b7280)', marginTop: 4 }}>{label}</span>
     </div>
   );
 };

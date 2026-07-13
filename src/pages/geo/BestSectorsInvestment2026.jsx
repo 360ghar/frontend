@@ -273,7 +273,7 @@ export default function BestSectorsInvestment2026() {
         <section className="geo-cta">
           <h2 className="geo-cta__title">Ready to Find Your Investment Property?</h2>
           <p className="geo-cta__sub">
-            Browse verified investment-ready properties across Gurugram's top sectors with 360° virtual tours.
+            Browse verified investment-ready properties across Gurugram&apos;s top sectors with 360° virtual tours.
           </p>
           <div className="geo-cta__buttons">
             <I18nLink to="/properties" className="geo-btn geo-btn--primary">Browse Properties</I18nLink>

@@ -146,7 +146,10 @@ export const parsePropertySearchParams = (searchParams) => {
     // page-based contract and are intentionally ignored. The new contract
     // uses an opaque `cursor` token that is not a filter and is managed in
     // component state, so we never parse it into the filter object.
-    if (key === 'page' || key === 'offset' || key === 'cursor') {
+    // `view` controls only client-side presentation. Treating it as an API
+    // filter makes a grid/list toggle create a needless new SWR cache entry
+    // and re-fetch the same property results.
+    if (key === 'page' || key === 'offset' || key === 'cursor' || key === 'view') {
       continue;
     }
 
