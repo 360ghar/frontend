@@ -90,31 +90,42 @@ jobs:
             loc=$(grep -i '^location:' "$headers" | head -1 | awk '{print $2}' | tr -d '\r' || true)
             rm -f "$headers"
             echo "smoke ${path} -> HTTP ${code} Location=${loc:-none}"
-            # Self-redirect loop: 3xx with Location equal to the request path.
+            # These paths must be 200/304 — any 3xx (including self-301 loops) fails the deploy.
             if [ "$code" = "301" ] || [ "$code" = "302" ] || [ "$code" = "308" ]; then
               if [ "$loc" = "$path" ] || [ "$loc" = "https://360ghar.com${path}" ] || [ "$loc" = "https://360ghar.com${path%/}/" ]; then
                 echo "::error::Self-redirect loop detected on ${path}"
-                fail=1
-              fi
-            fi
-            if [ "$code" != "200" ] && [ "$code" != "304" ]; then
-              # Allow a single hop only if Location is a different path (e.g. www).
-              if [ "$code" = "301" ] || [ "$code" = "302" ] || [ "$code" = "308" ]; then
-                echo "::warning::Unexpected redirect on ${path} (code ${code} -> ${loc})"
-                fail=1
               else
-                echo "::error::Expected 200 for ${path}, got ${code}"
-                fail=1
+                echo "::error::Unexpected redirect on ${path} (code ${code} -> ${loc})"
               fi
+              fail=1
+            elif [ "$code" != "200" ] && [ "$code" != "304" ]; then
+              echo "::error::Expected 200 for ${path}, got ${code}"
+              fail=1
             fi
           done
           # Body must be HTML, not a redirect stub.
-          body=$(curl -sS --max-redirs 3 --max-time 20 "https://360ghar.com/" | head -c 200 || true)
-          echo "homepage body snip: ${body}"
-          echo "$body" | grep -qi '<!doctype html\|<html' || {
+          html=$(mktemp)
+          curl -sS --max-redirs 3 --max-time 20 "https://360ghar.com/" -o "$html" || true
+          echo "homepage body snip: $(head -c 200 "$html" || true)"
+          grep -Eiq '<!doctype html|<html' "$html" || {
             echo "::error::Homepage body is not HTML"
             fail=1
           }
+          # Hashed JS from the shell must be reachable (catches edge/static 301 regressions).
+          script=$(grep -Eo '/assets/[^"[:space:]]+\.js' "$html" | head -1 || true)
+          rm -f "$html"
+          if [ -n "${script:-}" ]; then
+            acode=$(curl -sS -o /dev/null --max-redirs 0 --max-time 20 \
+              -w '%{http_code}' "https://360ghar.com${script}" || echo "000")
+            echo "smoke asset ${script} -> HTTP ${acode}"
+            if [ "$acode" != "200" ] && [ "$acode" != "304" ]; then
+              echo "::error::Expected 200 for asset ${script}, got ${acode}"
+              fail=1
+            fi
+          else
+            echo "::error::No /assets/*.js reference found in homepage HTML"
+            fail=1
+          fi
           if [ "$fail" -ne 0 ]; then
             echo "::error::Production smoke checks failed — site may still be down"
             exit 1

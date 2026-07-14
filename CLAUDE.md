@@ -771,9 +771,12 @@ VITE_GOOGLE_PLACES_API_KEY=your_google_places_api_key
 ## Deployment & CI
 
 ### Production deploys
-- Production builds run in GitHub Actions (`.github/workflows/content-build.yml`) and are uploaded to Netlify via `netlify-cli deploy --prod`.
+- Production builds run in GitHub Actions (`.github/workflows/content-build.yml`) and are uploaded to Netlify via:
+  `netlify-cli deploy --prod --dir=dist --no-build`
+  **`--no-build` is required** — without it the CLI re-runs `build:preview` and overwrites the full `build:full` artifact (2026-07-14 outage contributor).
 - Netlify's own git-triggered production builds are skipped by `context.production.ignore` in `netlify.toml`.
 - The scheduled `precompute-content.yml` job refreshes vendored sitemaps, RSS, localities, and optimized images and commits them to `main`.
+- Edge functions under `netlify/edge-functions/` are intentionally empty; parked code lives in `netlify/edge-functions-disabled/`.
 
 ### Deploy previews
 - Netlify runs `npm run build:preview` for deploy previews and branch deploys.
