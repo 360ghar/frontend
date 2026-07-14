@@ -28,12 +28,9 @@
   status = 301
   force = true
 
-# Trailing slash normalization — force=true ensures this fires before the SPA catch-all
-[[redirects]]
-  from = "/*/"
-  to = "/:splat"
-  status = 301
-  force = true
+# NOTE: Do NOT add a force trailing-slash strip rule (from = "/*/" → "/:splat").
+# Combined with Netlify Pretty URLs / SPA rewrites it has produced site-wide
+# HTTP 301 self-redirect loops (2026-07-14 outage). Prefer in-app canonicals.
 
 # Direct gurugram+apartments → gurgaon+flats (avoid redirect chain)
 [[redirects]]

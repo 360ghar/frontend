@@ -115,7 +115,13 @@ Netlify only builds **deploy previews** and **branch deploys**. Production deplo
 
 - Triggers: `push` to `main`, nightly cron (~00:00 IST), `workflow_dispatch`
 - Runs `npm run build:full` (with `SKIP_PRECOMPUTE=1` on `push` to reuse vendored artifacts)
-- Deploys with `netlify-cli` when secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` are set
+- Deploys with:
+  ```bash
+  npx netlify-cli deploy --prod --dir=dist --no-build --message "content-build $GITHUB_SHA"
+  ```
+  **`--no-build` is mandatory.** Without it, the CLI re-runs `build.command` (`build:preview`) and overwrites the full `dist/` artifact (root cause contributor for the 2026-07-14 outage).
+- Post-deploy smoke: asserts `/`, `/properties`, `/about-us` return 200 (not self-301) and homepage body is HTML.
+- Requires secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`
 
 ### `.github/workflows/precompute-content.yml`
 
@@ -159,7 +165,7 @@ Submit same-host sitemap URLs after full build.
 
 ## Edge Functions
 
-Unchanged: `netlify/edge-functions/` (`markdown-negotiation.js`, `soft-404-guard.js`). Soft-404 still covers SPA routes that are not prerendered on fast deploys.
+**Disabled in production (2026-07-14).** Active dir `netlify/edge-functions/` is empty; implementations are parked under `netlify/edge-functions-disabled/` (`soft-404-guard.js`, `markdown-negotiation.js`). Re-enable only after the checklist in that folder’s README (deploy-preview smoke: 200s, no self-301, edge logs clean).
 
 ## Why deploys used to take 10+ minutes
 

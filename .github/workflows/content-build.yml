@@ -68,10 +68,58 @@ jobs:
       - name: Deploy to Netlify (production)
         if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
         run: |
+          # --no-build is required: without it, netlify-cli re-runs build.command
+          # (build:preview) and overwrites the build:full dist artifact.
           npx netlify-cli deploy \
             --prod \
             --dir=dist \
+            --no-build \
             --message "content-build ${GITHUB_SHA}"
+
+      - name: Post-deploy smoke (no self-301 loop)
+        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
+        run: |
+          set -euo pipefail
+          # Allow CDN a few seconds to flip production.
+          sleep 5
+          fail=0
+          for path in / /properties /about-us; do
+            headers=$(mktemp)
+            code=$(curl -sS -D "$headers" -o /dev/null --max-redirs 0 --max-time 20 \
+              -w '%{http_code}' "https://360ghar.com${path}" || echo "000")
+            loc=$(grep -i '^location:' "$headers" | head -1 | awk '{print $2}' | tr -d '\r' || true)
+            rm -f "$headers"
+            echo "smoke ${path} -> HTTP ${code} Location=${loc:-none}"
+            # Self-redirect loop: 3xx with Location equal to the request path.
+            if [ "$code" = "301" ] || [ "$code" = "302" ] || [ "$code" = "308" ]; then
+              if [ "$loc" = "$path" ] || [ "$loc" = "https://360ghar.com${path}" ] || [ "$loc" = "https://360ghar.com${path%/}/" ]; then
+                echo "::error::Self-redirect loop detected on ${path}"
+                fail=1
+              fi
+            fi
+            if [ "$code" != "200" ] && [ "$code" != "304" ]; then
+              # Allow a single hop only if Location is a different path (e.g. www).
+              if [ "$code" = "301" ] || [ "$code" = "302" ] || [ "$code" = "308" ]; then
+                echo "::warning::Unexpected redirect on ${path} (code ${code} -> ${loc})"
+                fail=1
+              else
+                echo "::error::Expected 200 for ${path}, got ${code}"
+                fail=1
+              fi
+            fi
+          done
+          # Body must be HTML, not a redirect stub.
+          body=$(curl -sS --max-redirs 3 --max-time 20 "https://360ghar.com/" | head -c 200 || true)
+          echo "homepage body snip: ${body}"
+          echo "$body" | grep -qi '<!doctype html\|<html' || {
+            echo "::error::Homepage body is not HTML"
+            fail=1
+          }
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::Production smoke checks failed — site may still be down"
+            exit 1
+          fi
+          echo "Production smoke checks passed."
 
       - name: Skip deploy notice
         if: ${{ env.NETLIFY_AUTH_TOKEN == '' || env.NETLIFY_SITE_ID == '' }}

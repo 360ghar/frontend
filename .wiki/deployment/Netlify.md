@@ -1,26 +1,30 @@
 # Netlify Deployment
 
 This page documents how the 360Ghar frontend is built and served on Netlify. All
-runtime behaviour is driven by `netlify.toml` at the repo root and the single
-edge function under `netlify/edge-functions/`. If you change deploy behaviour,
-update both this page and `netlify.toml` together.
-
-For the build steps that run *before* Netlify ships files (entity ingestion,
-sitemaps, prerendering, CSS purging), see [Build Pipeline](../build/Build-Pipeline).
+runtime behaviour is driven by `netlify.toml` at the repo root. Production is
+built in GitHub Actions and uploaded with the Netlify CLI; Netlify only builds
+deploy previews. If you change deploy behaviour, update this page, `netlify.toml`,
+and [Build Pipeline](../build/Build-Pipeline) together.
 
 ## Build configuration
 
 | Setting | Value | Source |
 |---|---|---|
-| Build command | `npx puppeteer browsers install chrome && npm run build` | `netlify.toml` `[build].command` |
+| Preview build command | `npm run build:preview` | `netlify.toml` `[build].command` |
+| Production build | `npm run build:full` in GHA, then CLI deploy | `.github/workflows/content-build.yml` |
 | Publish directory | `dist` | `netlify.toml` `[build].publish` |
 | Node version | `20` | `netlify.toml` `[build.environment].NODE_VERSION` |
-| Puppeteer cache | `./node_modules/.cache/puppeteer` | `netlify.toml` `[build.environment].PUPPETEER_CACHE_DIR` |
+| Production git builds | Skipped (`context.production.ignore`) | `netlify.toml` |
 
-The `puppeteer browsers install chrome` step is required because the production
-build prerenders key routes with a headless Chromium (see
-`scripts/prerender-pages.mjs`). Netlify's build containers do not ship Chrome
-by default, so it must be installed into the build cache on every run.
+### Production CLI deploy (critical)
+
+```bash
+npx netlify-cli deploy --prod --dir=dist --no-build --message "content-build $GITHUB_SHA"
+```
+
+**Always pass `--no-build`.** Without it, netlify-cli re-runs `build:preview` and
+overwrites the full SEO/prerender `dist/` from Actions. That bug contributed to
+the 2026-07-14 site-wide outage.
 
 ### Build environment variables
 
@@ -72,9 +76,13 @@ redirect is declared **before** the SPA catch-all so it wins.
 | From | To | Status | Notes |
 |---|---|---|---|
 | `https://www.360ghar.com/*` | `https://360ghar.com/:splat` | 301 | WWW → non-www, `force = true` |
-| `/*/` (trailing slash) | `/:splat` | 301 | Trailing slash strip, `force = true` |
 | `/gurugram/*` | `/gurgaon/:splat` | 301 | City slug unification |
 | `/hi/gurugram/*` | `/hi/gurgaon/:splat` | 301 | Same, for Hindi routes |
+
+**Trailing-slash force redirect removed (2026-07-14).** A `/*/` → `/:splat`
+`force = true` rule was a prime suspect in site-wide HTTP 301 self-redirect
+loops. Prefer in-app canonical URLs; do not reintroduce a force slash strip
+without deploy-preview proof that `/` and static assets still return 200.
 
 ### Content slug canonicalisation
 
@@ -158,50 +166,23 @@ covers: `api-catalog`, `openid-configuration`, `oauth-authorization-server`,
 
 ## Edge functions
 
-Netlify auto-discovers Deno edge functions under `netlify/edge-functions/`:
+**Status (2026-07-14): all edge functions disabled.**
+
+| Path | Role |
+|------|------|
+| `netlify/edge-functions/` | Active dir — intentionally empty (only a README) |
+| `netlify/edge-functions-disabled/` | Parked code + re-enable checklist |
+
+Parked implementations (do not load until checklist passes):
 
 | File | Purpose |
 |------|---------|
-| `markdown-negotiation.js` | Accept: text/markdown → HTML-to-Markdown transform |
 | `soft-404-guard.js` | Unknown SPA paths → real HTTP 404 + noindex (`/404.html`) |
+| `markdown-negotiation.js` | `Accept: text/markdown` → HTML-to-Markdown transform |
 
-`netlify/edge-functions-disabled/` is a holding area for edge code that must
-not run (see its README). Never put active handlers there.
-
-### Markdown content negotiation
-
-When a request includes `Accept: text/markdown` (and prefers it over
-`text/html` by q-value), the function transforms the HTML response into
-Markdown before returning it. This follows the
-[Cloudflare markdown-for-agents](https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/)
-proposal and lets LLM agents fetch clean Markdown instead of HTML.
-
-Behaviour:
-
-- Runs on `/*` by default.
-- Excluded paths: `/assets/*`, `/.well-known/*`, `/data/*`, `/blueprint3d/*`,
-  `/rss/*`.
-- Non-HTML responses are passed through untouched.
-- Response headers: `Content-Type: text/markdown; charset=utf-8`,
-  `X-Markdown-Tokens` (rough token estimate, 1 token ≈ 4 chars),
-  `Cache-Control: public, max-age=0, must-revalidate`, `Vary: Accept`.
-
-### Soft-404 guard
-
-Converts SPA soft-404s (`/* → /index.html 200`) into hard 404s for paths that
-match no valid route grammar.
-
-- **404 body:** `fetch('/404.html')` then `Response` with status 404 (do not
-  use `context.rewrite` — not documented; rewrites are status 200).
-- **Fail-open:** try/catch around the whole handler; on error, bare `return`
-  continues the chain (site stays up; soft-404 may return).
-- **Allow paths:** bare `return` (not `context.next()`) when the path is
-  valid or is a static passthrough.
-- **Verify:** `/` and `/properties` → 200; `/foo/bar` junk → 404 + noindex.
-- The HTML-to-Markdown transform is a hand-rolled rule list (headings,
-  paragraphs, bold/italic, links, images, lists, code, blockquotes, tables).
-  It is intentionally simple — do not extend it for rich content; update the
-  source HTML instead.
+`soft-404-guard` previously caused site-wide 500s (2026-07-09). Both functions
+were disabled again during the 2026-07-14 self-301 outage. See
+`netlify/edge-functions-disabled/README.md` before re-enabling.
 
 There are no Netlify Functions (serverless Lambda-style) in this repo. All
 server logic lives in the backend API at `https://api.360ghar.com`.
@@ -209,8 +190,8 @@ server logic lives in the backend API at `https://api.360ghar.com`.
 ## Deploy previews
 
 Netlify automatically builds a deploy preview for every pull request against
-`main`. Previews use the same `netlify.toml` and the same build command, so
-they exercise the full pipeline (sitemaps, prerender, CSS purge) end-to-end.
+`main`. Previews use `npm run build:preview` (fast path: Vite only, no full
+prerender). Production is never built by Netlify git — only by GitHub Actions.
 
 Things to know about previews:
 
