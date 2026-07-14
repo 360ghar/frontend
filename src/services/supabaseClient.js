@@ -73,6 +73,10 @@ async function getClientLazy() {
     if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
     const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       auth: {
+        // PKCE: Google OAuth returns ?code= for exchangeCodeForSession on
+        // /auth/callback. Default is implicit (#access_token), which breaks
+        // the callback handler that only looks for `code`.
+        flowType: 'pkce',
         persistSession: true,
         autoRefreshToken: true,
         // Google OAuth redirects to /auth/callback?code=... and AuthCallbackPage

@@ -13,6 +13,22 @@ function sanitizeNext(next) {
   return next.startsWith('/') && !next.startsWith('//') ? next : '/';
 }
 
+const OAUTH_NEXT_KEY = 'oauth:next';
+
+/** Prefer sessionStorage stash (clean redirectTo); URL ?next= is legacy fallback. */
+function consumeOAuthNext(urlNext) {
+  let stored = null;
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      stored = sessionStorage.getItem(OAUTH_NEXT_KEY);
+      sessionStorage.removeItem(OAUTH_NEXT_KEY);
+    } catch {
+      stored = null;
+    }
+  }
+  return sanitizeNext(stored ?? urlNext);
+}
+
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -26,7 +42,7 @@ const AuthCallbackPage = () => {
     const code = searchParams.get('code');
     const oauthError = searchParams.get('error');
     const oauthDescription = searchParams.get('error_description');
-    const next = sanitizeNext(searchParams.get('next'));
+    const next = consumeOAuthNext(searchParams.get('next'));
 
     async function handleCallback() {
       if (oauthError) {

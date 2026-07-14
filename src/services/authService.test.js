@@ -95,14 +95,17 @@ describe('authService.signInWithGoogle', () => {
       value: { origin: 'https://www.360ghar.com' },
       configurable: true,
     });
+    sessionStorage.clear();
 
     const authService = await loadAuthService();
-    await authService.signInWithGoogle('/');
+    await authService.signInWithGoogle('/shortlist');
 
     const redirectTo = signInWithOAuth.mock.calls[0][0].options.redirectTo;
-    // www. is stripped; the next param is preserved.
-    expect(redirectTo.startsWith('https://360ghar.com/auth/callback')).toBe(true);
+    // www. is stripped; next is NOT on redirectTo (allowlist-safe).
+    expect(redirectTo).toBe('https://360ghar.com/auth/callback');
     expect(redirectTo).not.toContain('www.');
+    expect(redirectTo).not.toContain('next');
+    expect(sessionStorage.getItem('oauth:next')).toBe('/shortlist');
 
     Object.defineProperty(window, 'location', {
       value: { origin: original },

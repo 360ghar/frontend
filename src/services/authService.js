@@ -60,8 +60,14 @@ export const authService = {
   // Kicks off the Supabase Google OAuth redirect. Supabase redirects to Google,
   // then back to `${origin}/auth/callback?code=...` which AuthCallbackPage
   // exchanges for a session. No client-side Google client id needed here.
-  // Override the callback origin via VITE_AUTH_REDIRECT_URL for Docker /
-  // reverse-proxy setups that need a specific callback URL.
+  //
+  // CRITICAL: redirectTo must be origin + /auth/callback with NO query string.
+  // Putting ?next= on redirectTo often fails Supabase allowlist matching and
+  // silently falls back to Site URL. Post-login destination is stashed in
+  // sessionStorage (oauth:next) for AuthCallbackPage.
+  //
+  // In production, always use window.location.origin (dev may override via
+  // VITE_AUTH_REDIRECT_URL for Docker / reverse-proxy).
   //
   // The redirect URL MUST be allowlisted in the Supabase dashboard
   // (Authentication → URL Configuration → Redirect URLs), and the Supabase
@@ -70,7 +76,11 @@ export const authService = {
   // A "redirect_uri_mismatch" almost always means one of those is missing.
   signInWithGoogle: async (next) => {
     const client = await ensureSupabaseClient();
-    const base = import.meta.env.VITE_AUTH_REDIRECT_URL ?? window.location.origin;
+    const isProd = import.meta.env.PROD;
+    const base =
+      !isProd && import.meta.env.VITE_AUTH_REDIRECT_URL
+        ? import.meta.env.VITE_AUTH_REDIRECT_URL
+        : window.location.origin;
     // Canonicalize to the non-www origin so a visitor on https://www.360ghar.com
     // (which Netlify 301-redirects to non-www) still produces the allowlisted
     // callback URL instead of a www variant that Supabase rejects.
@@ -78,9 +88,22 @@ export const authService = {
     if (callbackUrl.hostname.startsWith('www.')) {
       callbackUrl.hostname = callbackUrl.hostname.slice(4);
     }
-    if (next && typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')) {
-      callbackUrl.searchParams.set('next', next);
+    callbackUrl.search = '';
+    callbackUrl.hash = '';
+
+    // Stash safe same-site destination for the callback page (not on redirectTo).
+    if (typeof sessionStorage !== 'undefined') {
+      try {
+        const safeNext =
+          next && typeof next === 'string' && next.startsWith('/') && !next.startsWith('//')
+            ? next
+            : '/';
+        sessionStorage.setItem('oauth:next', safeNext);
+      } catch {
+        // Private mode / quota — callback falls back to URL param or /.
+      }
     }
+
     const { data, error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
