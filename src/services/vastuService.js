@@ -35,7 +35,7 @@ export const analyzeFloorPlan = async (
   formData.append('image', imageFile);
   formData.append('north_direction', northDirection);
   formData.append('notes', notes || '');
-  formData.append('provider', 'glm'); // Default to GLM-4V-Flash
+  // Provider is selected by the backend (VASTU_DEFAULT_PROVIDER + fallback).
 
   const response = await vastuApi.post('/vastu/analyze', formData, {
     headers: {
