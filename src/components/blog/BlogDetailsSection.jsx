@@ -185,7 +185,6 @@ const SANITIZE_OPTIONS = {
 
 const BlogDetailsSection = () => {
     const { title: slug } = useParams();
-    const { t } = useTranslation();
     const [tSeo] = useTranslation('seo');
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);

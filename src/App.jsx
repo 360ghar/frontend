@@ -58,7 +58,6 @@ const GurugramGuide = lazy(() => import('./pages/core/GurugramGuide'));
 const PropertyInvestment = lazy(() => import('./pages/core/PropertyInvestment'));
 const ForAI = lazy(() => import('./pages/core/ForAI'));
 const FacetLanding = lazy(() => import('./pages/landing/FacetLanding'));
-const McpLogin = lazy(() => import('./pages/account/McpLogin'));
 const AIAgent = lazy(() => import('./pages/core/AIAgent'));
 const LocalityTemplate = lazy(() => import('./pages/localities/LocalityTemplate'));
 const LocalitiesDirectory = lazy(() => import('./pages/localities/LocalitiesDirectory'));
@@ -129,7 +128,6 @@ const propertyRoutes = [
 
 const accountRoutes = [
   { path: '/login', element: <Login /> },
-  { path: '/mcp/login', element: <McpLogin /> },
   { path: '/register', element: <Register /> },
   { path: '/account', element: <Account /> },
   { path: '/delete-account', element: <AccountDeletionRequest /> },

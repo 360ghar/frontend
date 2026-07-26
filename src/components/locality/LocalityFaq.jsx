@@ -194,5 +194,8 @@ const LocalityFaq = ({ localityName, entityType, items = [] }) => {
     );
 };
 
+// Helper co-located with the component (also used internally); Fast Refresh's
+// components-only rule is relaxed for this named export.
+// eslint-disable-next-line react-refresh/only-export-components
 export { defaultFaqBuilder };
 export default LocalityFaq;

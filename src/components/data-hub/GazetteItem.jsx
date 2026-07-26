@@ -1,5 +1,3 @@
-import React from 'react';
-
 const TYPE_COLORS = {
   land_acquisition: { bg: '#fef2f2', color: '#991b1b', label: 'Land Acquisition' },
   rate_revision: { bg: '#eff6ff', color: '#1d4ed8', label: 'Rate Revision' },

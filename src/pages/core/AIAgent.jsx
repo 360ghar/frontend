@@ -91,7 +91,7 @@ const AIAgent = () => {
                                 No apps to navigate, no forms to fill. Just ask.
                             </p>
                             <div className="ai-hero__cta">
-                                <I18nLink to="/mcp/login" className="btn btn-main">
+                                <I18nLink to="/for-ai" className="btn btn-main">
                                     Connect AI Assistant
                                     <span className="icon-right"><i className="fas fa-arrow-right"></i></span>
                                 </I18nLink>

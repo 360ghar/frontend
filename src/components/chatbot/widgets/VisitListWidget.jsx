@@ -25,7 +25,9 @@ const STATUS_LABELS = {
 export default function VisitListWidget({ data }) {
   if (!data) return null;
 
-  const visits = Array.isArray(data?.items) ? data.items : [];
+  // The agent's bookings_list returns rows under `bookings`, visits_list under
+  // `visits`; older payloads used `items`. Accept whichever is present.
+  const visits = [data?.bookings, data?.visits, data?.items].find(Array.isArray) || [];
 
   if (visits.length === 0) {
     return (
@@ -48,7 +50,7 @@ export default function VisitListWidget({ data }) {
             <li key={visit.id || i} className="chatbot-visit-item">
               <div className="chatbot-visit-item__main">
                 <p className="chatbot-visit-item__property">{visit.property_title || visit.property?.title || 'Property'}</p>
-                <p className="chatbot-visit-item__date">{formatDate(visit.scheduled_date || visit.check_in)}</p>
+                <p className="chatbot-visit-item__date">{formatDate(visit.scheduled_date || visit.check_in_date || visit.check_in)}</p>
               </div>
               <span className={`chatbot-badge ${status.cls}`}>{status.label}</span>
             </li>

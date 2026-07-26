@@ -6,7 +6,7 @@
   "endpoint": "https://api.360ghar.com/mcp",
   "capabilities": {
     "tools": true,
-    "resources": false,
+    "resources": true,
     "prompts": false
   }
 }

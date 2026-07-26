@@ -25,7 +25,6 @@ const BlogClassic = () => {
     const tag = searchParams.get('tag') || '';
     const isFiltered = Boolean(category || tag);
 
-    const POSTS_PER_PAGE = 10;
     // AUDIT FIX (4.5 / 4.4): popular posts for the blog listing + keyword
     // search box that redirects to the property search when no blog match.
     const [popularPosts, setPopularPosts] = useState([]);

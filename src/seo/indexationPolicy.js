@@ -100,7 +100,6 @@ export const noindexPrerenderRoutes = [
   '/delete-account',
   '/post-property',
   '/add-new-listing',
-  '/mcp/login',
   '/map-location',
   '/property-sidebar',
 ];

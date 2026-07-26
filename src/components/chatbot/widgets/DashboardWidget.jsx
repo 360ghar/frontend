@@ -8,14 +8,29 @@ function StatCard({ label, value, icon }) {
   );
 }
 
+function formatIncome(value) {
+  if (value === undefined || value === null) return undefined;
+  if (value >= 10000000) return `₹${(value / 10000000).toFixed(2)} Cr`;
+  if (value >= 100000) return `₹${(value / 100000).toFixed(2)} L`;
+  return `₹${Number(value).toLocaleString('en-IN')}`;
+}
+
 export default function DashboardWidget({ data }) {
   if (!data) return null;
 
+  // owner_properties_list nests its counters under `stats`; the PM dashboard
+  // tools put them at the top level. Reading only the top level made every
+  // owner dashboard render blank.
+  const d = { ...data, ...(data.stats ?? {}) };
+
   const stats = [
-    { label: 'Properties', value: data.total_properties ?? data.properties_count, icon: '🏠' },
-    { label: 'Active Leases', value: data.active_leases ?? data.leases_count, icon: '📋' },
-    { label: 'Pending Maintenance', value: data.pending_maintenance ?? data.maintenance_count, icon: '🔧' },
-    { label: 'Pending Visits', value: data.pending_visits ?? data.visits_count, icon: '📅' },
+    { label: 'Properties', value: d.total_properties ?? d.properties_count, icon: '🏠' },
+    { label: 'Occupied', value: d.occupied, icon: '🔑' },
+    { label: 'Vacant', value: d.vacant, icon: '🚪' },
+    { label: 'Monthly Income', value: formatIncome(d.total_monthly_income), icon: '💰' },
+    { label: 'Active Leases', value: d.active_leases ?? d.leases_count, icon: '📋' },
+    { label: 'Pending Maintenance', value: d.pending_maintenance ?? d.maintenance_count, icon: '🔧' },
+    { label: 'Pending Visits', value: d.pending_visits ?? d.visits_count, icon: '📅' },
   ].filter(s => s.value !== undefined && s.value !== null);
 
   if (stats.length === 0) return null;

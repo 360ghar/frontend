@@ -89,7 +89,7 @@ if (navigator.modelContext?.registerTool) {
         required: ['property_id', 'scheduled_date'],
       },
       execute: async (_input) => {
-        return { message: 'Please visit https://360ghar.com/mcp/login to authenticate, then schedule a visit via the API at POST /visits/' };
+        return { message: 'Authenticate via the 360Ghar MCP OAuth flow at https://api.360ghar.com/mcp/oauth/authorize, then schedule a visit via the API at POST /visits/' };
       },
     },
     { signal: controller.signal }

@@ -77,7 +77,6 @@ Pages are organized into subdirectories by feature domain:
 - `Register.jsx` - User registration page
 - `Account.jsx` - User dashboard with tabs (profile, properties, favorites)
 - `AccountDeletionRequest.jsx` - Account deletion request form
-- `McpLogin.jsx` - MCP (Model Context Protocol) login for AI assistants
 
 #### Property Pages (`src/pages/properties/`)
 - `Property.jsx` - Property listings with filters
@@ -558,7 +557,6 @@ The app uses React Router v6 with the following route structure:
 /faq                        → FAQ page
 /contact                    → Contact page
 /login                      → Login page
-/mcp/login                  → MCP login for AI assistants
 /register                   → Registration page
 /account                    → User dashboard (protected)
 /delete-account             → Account deletion request

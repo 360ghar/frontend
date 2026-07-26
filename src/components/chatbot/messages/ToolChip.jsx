@@ -38,6 +38,23 @@ const TOOL_LABEL_KEYS = {
   discovery_search: 'chatbot.tools.searchingProperties',
   discovery_property_get: 'chatbot.tools.gettingProperty',
   discovery_feed: 'chatbot.tools.loadingFeed',
+  discovery_recommendations: 'chatbot.tools.searchingProperties',
+  discovery_shortlist: 'chatbot.tools.checkingProperties',
+  discovery_amenities: 'chatbot.tools.checkingStatus',
+  visits_schedule: 'chatbot.tools.creatingBooking',
+  visits_list: 'chatbot.tools.checkingBookings',
+  visits_get: 'chatbot.tools.gettingBookingDetails',
+  visits_cancel: 'chatbot.tools.cancellingBooking',
+  owner_dashboard_overview: 'chatbot.tools.loadingDashboard',
+  owner_leases_list: 'chatbot.tools.checkingLeases',
+  owner_leases_get: 'chatbot.tools.checkingLease',
+  owner_leases_terminate: 'chatbot.tools.terminatingLease',
+  owner_rent_status: 'chatbot.tools.checkingRentHistory',
+  owner_rent_record_payment: 'chatbot.tools.recordingPayment',
+  owner_rent_history: 'chatbot.tools.checkingRentHistory',
+  owner_maintenance_list: 'chatbot.tools.checkingMaintenance',
+  owner_maintenance_update: 'chatbot.tools.updatingMaintenance',
+  tenant_rent_dues: 'chatbot.tools.checkingRentHistory',
 };
 
 function humanize(snakeName) {

@@ -160,7 +160,7 @@ const ReferralForm = () => {
       });
       toastSuccess('Referral submitted successfully!');
       setFormData(INITIAL_FORM_STATE);
-    } catch (error) {
+    } catch {
       const errorMessage = 'Failed to submit referral. Please try again.';
       setSubmitStatus({ type: 'error', message: errorMessage });
       toastError(errorMessage);

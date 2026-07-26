@@ -1,4 +1,3 @@
-import React from 'react';
 import ScoreWheel from './ScoreWheel';
 
 const BuilderScoreChart = ({ score = 0, totalProjects = 0, totalComplaints = 0 }) => (

@@ -193,7 +193,7 @@ export const aiAgentCTASection = {
     title: "Ready to Find Home the Smart Way?",
     subtitle: "Connect your AI assistant in seconds and discover India's VR-First Way to Find a Home — verified properties, guided walkthroughs, complete transparency.",
     primaryCTA: "Connect AI Assistant",
-    primaryLink: "/mcp/login",
+    primaryLink: "/for-ai",
     secondaryCTA: "Learn More",
     secondaryLink: "/ai-agent"
 };

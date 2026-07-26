@@ -4,7 +4,6 @@ import {
   validateSchema,
   validateAllStructuredData,
   generateValidationReport,
-  runValidation,
 } from './validateStructuredData';
 import {
   generatePersonStructuredData,

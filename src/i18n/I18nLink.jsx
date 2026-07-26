@@ -1,4 +1,9 @@
 // I18nLink is the localization-aware replacement for react-router-dom's Link.
+// This module intentionally co-locates the I18nLink/I18nNavLink components with
+// their path helpers (localizePath, stripLocalePrefix, useI18nNavigate) — a single
+// cohesive i18n-link utility imported together across the app, so Fast Refresh's
+// "components only" rule is disabled for the file rather than splitting 26 importers.
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable no-restricted-imports */
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 /* eslint-enable no-restricted-imports */

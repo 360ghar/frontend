@@ -36,11 +36,16 @@ Returns the created visit object with `id`, `property_id`, `scheduled_date`, `st
 
 ## Authentication
 
-Requires Bearer token (Supabase JWT). Obtain via:
+Requires a Bearer access token issued by the 360Ghar MCP OAuth 2.1 (PKCE) server.
+Obtain via the standard MCP authorization flow:
 
-1. Open `https://360ghar.com/mcp/login?redirect_uri=<your_callback>`
-2. User authenticates with phone + password
-3. Redirect includes `access_token` parameter
+1. Discover the authorization server at `https://api.360ghar.com/.well-known/oauth-authorization-server`
+   (or the protected-resource metadata at `/.well-known/oauth-protected-resource`).
+2. Register dynamically at `POST https://api.360ghar.com/mcp/oauth/register` (RFC 7591).
+3. Redirect the user to `https://api.360ghar.com/mcp/oauth/authorize` with your
+   `client_id`, PKCE `code_challenge`, `redirect_uri`, and `state`.
+4. Exchange the returned authorization `code` at `POST https://api.360ghar.com/mcp/oauth/token`
+   for an access token, and send it as `Authorization: Bearer <access_token>`.
 
 ## Example
 

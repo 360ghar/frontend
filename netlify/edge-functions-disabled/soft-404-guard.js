@@ -247,7 +247,7 @@ async function serveNotFound(request) {
   });
 }
 
-export default async (request, context) => {
+export default async (request, _context) => {
   // FAIL OPEN: any unexpected throw must not 500 the whole site. A false
   // negative (SPA 200 for a junk URL) is far better than a production outage.
   // Netlify Edge: first arg is the Fetch Request. Do NOT use context.request.

@@ -13,7 +13,7 @@
       "type": "skill-md",
       "description": "Schedule, reschedule, and cancel property visits on 360Ghar",
       "url": "https://360ghar.com/.well-known/agent-skills/visit-scheduling/SKILL.md",
-      "digest": "sha256:839727d0d11b00ef0a30e14143bc30855e12449d0a14a214a472da7297d3e384"
+      "digest": "sha256:46401bf5c4003a195d713c24a8c04844f60ae2b65a41bbd2dd4c3efbd5a2e579"
     },
     {
       "name": "property-tools",

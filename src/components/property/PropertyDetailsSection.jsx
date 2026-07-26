@@ -224,7 +224,7 @@ const PropertyDetailsSection = ({ property }) => {
       return { key, label, icon: getAmenityIcon(key) };
     });
   }, [property?.amenities]);
-  const listingPreferences = property?.listing_preferences || {};
+  const listingPreferences = useMemo(() => property?.listing_preferences || {}, [property?.listing_preferences]);
   const propertyTypeLabel = getPropertyTypeLabel(property?.property_type, t);
   const listingLabel = getListingLabel({
     propertyType: property?.property_type,
