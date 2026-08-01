@@ -8,6 +8,7 @@ import MobileMenu from '../../common/layout/MobileMenu';
 import OffCanvas from '../../common/layout/OffCanvas';
 import SEO from '../../common/SEO';
 import { generateBreadcrumbStructuredData } from '../../seo/structuredData';
+import { siteMetadata } from '../../seo/siteMetadata';
 import AuctionAlertModal from '../../components/data-hub/AuctionAlertModal';
 import { dataHubService } from '../../services/dataHubService';
 
@@ -102,24 +103,32 @@ const BankAuctionDetail = () => {
             { name: auction.city || 'Delhi NCR', url: `https://360ghar.com/bank-auctions?city=${encodeURIComponent(auction.city || '')}` },
             { name: auction.property_description || auction.property_type || 'Auction', url: `https://360ghar.com/bank-auctions/${id}` },
           ]),
-          {
-            '@type': 'Event',
-            name: auction.property_description || 'Property Auction',
-            description: `${sourceBadge} auction by ${institution || 'bank'}. Reserve price: ${formatPrice(auction.reserve_price)}.`,
-            startDate: auction.auction_date || undefined,
-            location: auction.address
-              ? { '@type': 'Place', name: auction.address, address: { '@type': 'PostalAddress', streetAddress: auction.address, addressLocality: 'Gurugram', addressRegion: 'Haryana', addressCountry: 'IN' } }
-              : { '@type': 'Place', name: 'Gurugram, Haryana' },
-            organizer: institution
-              ? { '@type': 'Organization', name: institution }
-              : undefined,
-            offers: {
-              '@type': 'Offer',
-              price: auction.reserve_price || 0,
-              priceCurrency: 'INR',
-              availability: 'https://schema.org/LimitedAvailability',
+          ...(auction.auction_date ? [
+            {
+              '@type': 'Event',
+              name: auction.property_description || 'Property Auction',
+              description: `${sourceBadge} auction by ${institution || 'bank'}. Reserve price: ${formatPrice(auction.reserve_price)}.`,
+              startDate: auction.auction_date,
+              endDate: auction.auction_date,
+              eventStatus: 'https://schema.org/EventScheduled',
+              eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+              image: siteMetadata.defaultOgImage,
+              location: auction.address
+                ? { '@type': 'Place', name: auction.address, address: { '@type': 'PostalAddress', streetAddress: auction.address, addressLocality: 'Gurugram', addressRegion: 'Haryana', addressCountry: 'IN' } }
+                : { '@type': 'Place', name: 'Gurugram, Haryana' },
+              organizer: institution
+                ? { '@type': 'Organization', name: institution }
+                : undefined,
+              ...(auction.reserve_price ? {
+                offers: {
+                  '@type': 'Offer',
+                  price: auction.reserve_price,
+                  priceCurrency: 'INR',
+                  availability: 'https://schema.org/LimitedAvailability',
+                },
+              } : {}),
             },
-          },
+          ] : []),
         ] : []}
       />
       <OffCanvas />

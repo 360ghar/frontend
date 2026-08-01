@@ -29,6 +29,8 @@ const Contact = () => {
             name: siteMetadata.organization.name,
             url: `${siteMetadata.siteUrl}/contact`,
             logo: absoluteUrl(siteMetadata.defaultOgImage),
+            geo: { '@type': 'GeoCoordinates', latitude: 28.4595, longitude: 77.0266 },
+            image: 'https://360ghar.com/assets/images/logo/logo.png',
             email: siteMetadata.organization.email,
             telephone: siteMetadata.organization.telephone,
             address: {

@@ -22,17 +22,22 @@ const GurugramGuide = () => {
       '@type': 'Article',
       headline: 'Complete Guide to Real Estate in Gurugram 2024',
       description: 'Comprehensive guide to buying, selling, and renting properties in Gurugram. Learn about top locations, property prices, market trends, and investment opportunities.',
-      image: '/assets/images/logo/logo.png',
+      url: 'https://360ghar.com/gurugram-real-estate-guide',
+      image: 'https://360ghar.com/assets/images/logo/logo.png',
       author: {
         '@type': 'Organization',
         name: '360Ghar'
       },
       publisher: {
         '@type': 'Organization',
-        name: '360Ghar'
+        name: '360Ghar',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://360ghar.com/assets/images/logo/logo.png'
+        }
       },
       datePublished: '2024-01-01',
-      dateModified: new Date().toISOString(),
+      dateModified: '2024-01-01',
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': 'https://360ghar.com/gurugram-real-estate-guide'

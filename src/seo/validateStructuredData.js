@@ -4,42 +4,55 @@
  * Use in development and CI/CD pipelines
  */
 
-import { realEstateStructuredData } from './structuredData';
+import { realEstateStructuredData } from './structuredData.js';
 
 // Required properties for each schema type
 const REQUIRED_PROPERTIES = {
-  Organization: ['@type', 'name', 'url', 'logo'],
+  Organization: ['@type', 'name'],
   RealEstateAgent: ['@type', 'name', 'url', 'telephone', 'address'],
   LocalBusiness: ['@type', 'name', 'url', 'address', 'telephone'],
   WebSite: ['@type', 'name', 'url'],
-  Product: ['@type', 'name', 'offers'],
-  Offer: ['@type', 'price', 'priceCurrency', 'availability'],
+  Product: ['@type', 'name', 'image', 'offers'],
+  Offer: ['@type'],
   FAQPage: ['@type', 'mainEntity'],
-  Question: ['@type', 'name', 'text', 'acceptedAnswer', 'author', 'datePublished'],
+  Question: ['@type', 'acceptedAnswer'],
   Answer: ['@type', 'text'],
   BreadcrumbList: ['@type', 'itemListElement'],
   ListItem: ['@type', 'position', 'name', 'item'],
   Person: ['@type', 'name'],
-  Event: ['@type', 'name', 'startDate', 'location'],
-  Place: ['@type', 'name'],
+  Event: ['@type', 'name', 'startDate', 'endDate', 'eventAttendanceMode', 'eventStatus', 'image', 'location'],
+  Place: ['@type'],
   PostalAddress: ['@type', 'addressCountry'],
   GeoCoordinates: ['@type', 'latitude', 'longitude'],
   ImageObject: ['@type', 'url'],
-  VideoObject: ['@type', 'name', 'thumbnailUrl'],
-  BlogPosting: ['@type', 'headline', 'datePublished'],
-  Article: ['@type', 'headline', 'datePublished'],
-  Course: ['@type', 'name', 'provider'],
+  VideoObject: ['@type', 'name', 'description', 'thumbnailUrl', 'uploadDate'],
+  BlogPosting: ['@type', 'headline', 'image', 'datePublished', 'author', 'publisher'],
+  Article: ['@type', 'headline', 'image', 'datePublished', 'author', 'publisher'],
+  Course: ['@type', 'name', 'description', 'provider'],
   PodcastSeries: ['@type', 'name', 'publisher'],
   QAPage: ['@type', 'mainEntity'],
   SpeakableSpecification: ['@type', 'cssSelector'],
-  JobPosting: ['@type', 'title', 'description', 'hiringOrganization'],
+  // Google's required fields for the Job Posting rich result (title, description,
+  // datePosted, validThrough, employmentType, hiringOrganization, jobLocation,
+  // baseSalary) — missing ones surface in GSC as "Missing field" errors.
+  JobPosting: [
+    '@type',
+    'title',
+    'description',
+    'datePosted',
+    'validThrough',
+    'employmentType',
+    'hiringOrganization',
+    'jobLocation',
+    'baseSalary',
+  ],
   Review: ['@type', 'reviewBody', 'reviewRating'],
   AggregateRating: ['@type', 'ratingValue', 'reviewCount'],
   HowTo: ['@type', 'name', 'step'],
   HowToStep: ['@type', 'text'],
   SoftwareApplication: ['@type', 'name'],
   MobileApplication: ['@type', 'name'],
-  ItemList: ['@type', 'numberOfItems'],
+  ItemList: ['@type'],
   VideoGallery: ['@type'],
   AggregateOffer: ['@type', 'lowPrice', 'highPrice', 'priceCurrency'],
 };
@@ -98,7 +111,9 @@ export function validateSchema(schema, schemaName = 'Unknown') {
   types.forEach(type => {
     const required = REQUIRED_PROPERTIES[type] || [];
     required.forEach(prop => {
-      if (!(prop in schema)) {
+      // `== null` (not `in`) so properties explicitly set to `undefined`
+      // (the `x || undefined` pattern, e.g. the old careers bug) are caught.
+      if (schema[prop] == null) {
         result.addError(`Missing required property "${prop}" for type ${type}`, `${schemaName}.${prop}`);
       }
     });
@@ -108,12 +123,78 @@ export function validateSchema(schema, schemaName = 'Unknown') {
       result.addWarning(`Missing recommended property "description" for Organization`, `${schemaName}.description`);
     }
 
+    if (type === 'Organization' && !schema.url) {
+      result.addWarning(`Missing recommended property "url" for Organization`, `${schemaName}.url`);
+    }
+
+    if (type === 'Organization' && !schema.logo) {
+      result.addWarning(`Missing recommended property "logo" for Organization`, `${schemaName}.logo`);
+    }
+
+    // Google QAPage / FAQ: Question needs a name OR text.
+    if (type === 'Question' && !schema.name && !schema.text) {
+      result.addError('Question must include a "name" or "text" property', `${schemaName}`);
+    }
+
     if (type === 'RealEstateAgent' && !schema.areaServed) {
       result.addWarning(`Missing recommended property "areaServed" for RealEstateAgent`, `${schemaName}.areaServed`);
     }
 
     if (type === 'Event' && !schema.offers) {
       result.addWarning(`Missing recommended property "offers" for Event`, `${schemaName}.offers`);
+    }
+
+    // Google flags missing streetAddress/postalCode in jobLocation.address as
+    // "Missing field" warnings in the GSC Job Postings report.
+    if (type === 'JobPosting' && !schema.jobLocation?.address?.streetAddress) {
+      result.addWarning(
+        'Missing recommended property "streetAddress" in "jobLocation.address" for JobPosting',
+        `${schemaName}.jobLocation.address.streetAddress`,
+      );
+    }
+
+    if (type === 'JobPosting' && !schema.jobLocation?.address?.postalCode) {
+      result.addWarning(
+        'Missing recommended property "postalCode" in "jobLocation.address" for JobPosting',
+        `${schemaName}.jobLocation.address.postalCode`,
+      );
+    }
+
+    // Google Product rich result: one of offers / aggregateRating / review is
+    // required, and offers must carry a real price triple.
+    if (type === 'Product') {
+      if (!schema.offers && !schema.aggregateRating && !schema.review) {
+        result.addError(
+          'Product must include at least one of offers, aggregateRating or review',
+          `${schemaName}`,
+        );
+      }
+      const offers = Array.isArray(schema.offers) ? schema.offers : (schema.offers ? [schema.offers] : []);
+      offers.forEach((offer, idx) => {
+        ['price', 'priceCurrency', 'availability'].forEach(prop => {
+          if (!offer || offer[prop] == null) {
+            result.addError(
+              `Missing required property "${prop}" in Product offer`,
+              `${schemaName}.offers[${idx}].${prop}`,
+            );
+          }
+        });
+      });
+    }
+
+    if (type === 'VideoObject' && !schema.contentUrl && !schema.embedUrl) {
+      result.addWarning(
+        'Missing recommended property "contentUrl" or "embedUrl" for VideoObject',
+        `${schemaName}`,
+      );
+    }
+
+    if ((type === 'LocalBusiness' || type === 'RealEstateAgent') && !schema.geo) {
+      result.addWarning(`Missing recommended property "geo" for ${type}`, `${schemaName}.geo`);
+    }
+
+    if ((type === 'LocalBusiness' || type === 'RealEstateAgent') && !schema.image) {
+      result.addWarning(`Missing recommended property "image" for ${type}`, `${schemaName}.image`);
     }
   });
 
@@ -124,6 +205,9 @@ export function validateSchema(schema, schemaName = 'Unknown') {
         const nestedResult = validateSchema(value, `${schemaName}.${key}`);
         result.errors.push(...nestedResult.errors);
         result.warnings.push(...nestedResult.warnings);
+        if (nestedResult.errors.length > 0) {
+          result.isValid = false;
+        }
       }
     }
 
@@ -134,6 +218,9 @@ export function validateSchema(schema, schemaName = 'Unknown') {
           const nestedResult = validateSchema(item, `${schemaName}.${key}[${index}]`);
           result.errors.push(...nestedResult.errors);
           result.warnings.push(...nestedResult.warnings);
+          if (nestedResult.errors.length > 0) {
+            result.isValid = false;
+          }
         }
       });
     }
@@ -153,7 +240,7 @@ export function validateSchema(schema, schemaName = 'Unknown') {
   });
 
   // Validate dates
-  const dateProps = ['startDate', 'endDate', 'datePublished', 'dateModified', 'uploadDate', 'datePosted'];
+  const dateProps = ['startDate', 'endDate', 'datePublished', 'dateModified', 'uploadDate', 'datePosted', 'validThrough'];
   dateProps.forEach(prop => {
     if (schema[prop]) {
       const date = new Date(schema[prop]);

@@ -122,6 +122,22 @@
   status = 200
   force = true
 
+# Legacy /data-hub/* paths -> canonical data-hub routes (fix soft-404s)
+[[redirects]]
+  from = "/data-hub/circle-rates"
+  to = "/circle-rates"
+  status = 301
+
+[[redirects]]
+  from = "/data-hub/rera-projects"
+  to = "/rera-projects"
+  status = 301
+
+[[redirects]]
+  from = "/data-hub/bank-auctions"
+  to = "/bank-auctions"
+  status = 301
+
 # SPA fallback - serve index.html for all unmatched routes
 [[redirects]]
   from = "/*"

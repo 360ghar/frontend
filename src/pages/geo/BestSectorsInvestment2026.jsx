@@ -101,7 +101,11 @@ const SCHEMA = {
         "A curated guide to the best areas for real estate investment in Gurugram in 2026, ranked by expected returns, rental yield, and risk profile.",
       "url": "https://360ghar.com/best-sectors-investment-2026",
       "author": { "@type": "Organization", "name": "360Ghar", "url": "https://360ghar.com" },
-      "publisher": { "@type": "Organization", "name": "360Ghar" },
+      "publisher": {
+        "@type": "Organization",
+        "name": "360Ghar",
+        "logo": { "@type": "ImageObject", "url": "https://360ghar.com/assets/images/logo/logo.png" }
+      },
       "datePublished": "2026-01-01",
       "dateModified": "2026-01-01",
       "image": "https://360ghar.com/og-image-home.jpg",

@@ -162,11 +162,12 @@ const AuctionSources = () => {
             '@type': 'Article',
             headline: 'Complete Guide to Government & Bank Property Auctions in Delhi NCR',
             description: 'Comprehensive guide covering 25+ government, bank, and aggregator auction portals for property auctions in Delhi, Gurugram, Meerut, and the NCR region.',
+            image: 'https://360ghar.com/og-image-home.jpg',
             url: 'https://360ghar.com/auction-sources',
             datePublished: '2025-05-01',
             dateModified: '2025-05-04',
             author: { '@type': 'Organization', name: '360Ghar', url: 'https://360ghar.com' },
-            publisher: { '@type': 'Organization', name: '360Ghar', url: 'https://360ghar.com', logo: { '@type': 'ImageObject', url: 'https://360ghar.com/assets/images/logo.png' } },
+            publisher: { '@type': 'Organization', name: '360Ghar', url: 'https://360ghar.com', logo: { '@type': 'ImageObject', url: 'https://360ghar.com/assets/images/logo/logo.png' } },
           },
           generateFaqStructuredData(FAQS),
           {

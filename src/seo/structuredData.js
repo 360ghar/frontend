@@ -1,5 +1,9 @@
-import { siteMetadata } from './siteMetadata';
-import { authors } from '../data/authors';
+import { siteMetadata } from './siteMetadata.js';
+import { authors } from '../data/authors.js';
+
+// Real logo asset (exists at public/assets/images/logo/logo.png). The old
+// https://360ghar.com/logo.png URL 404s in GSC image crawls.
+const ORGANIZATION_LOGO_URL = 'https://360ghar.com/assets/images/logo/logo.png';
 
 // Real Estate focused structured data for LLM optimization
 export const realEstateStructuredData = {
@@ -15,7 +19,7 @@ export const realEstateStructuredData = {
     url: 'https://360ghar.com',
     logo: {
       '@type': 'ImageObject',
-      url: 'https://360ghar.com/logo.png',
+      url: ORGANIZATION_LOGO_URL,
       width: 512,
       height: 512
     },
@@ -33,6 +37,7 @@ export const realEstateStructuredData = {
     ],
     address: {
       '@type': 'PostalAddress',
+      streetAddress: siteMetadata.organization.address.streetAddress,
       addressLocality: 'Gurgaon',
       addressRegion: 'Haryana',
       postalCode: '122001',
@@ -98,8 +103,7 @@ export const realEstateStructuredData = {
     '@type': 'ItemList',
     name: 'Properties for Sale and Rent in Gurugram',
     description: 'Verified properties by our on-site team with 360° virtual tours in prime Gurugram locations. End-to-end support by dedicated Relationship Managers.',
-    url: `${siteMetadata.siteUrl}/properties`,
-    numberOfItems: 1000
+    url: `${siteMetadata.siteUrl}/properties`
   },
 
   // Enhanced local business schema for better local SEO
@@ -108,7 +112,7 @@ export const realEstateStructuredData = {
     '@type': ['LocalBusiness', 'RealEstateAgent'],
     '@id': 'https://360ghar.com/#localbusiness',
     name: '360Ghar',
-    image: ['https://360ghar.com/logo.png', 'https://360ghar.com/office.jpg'],
+    image: [ORGANIZATION_LOGO_URL, siteMetadata.defaultOgImage],
     url: 'https://360ghar.com',
     telephone: siteMetadata.organization.telephone,
     priceRange: '₹₹',
@@ -668,11 +672,14 @@ export const generatePropertyStructuredData = (property) => ({
       value: 'Yes'
     }
   ],
-  aggregateRating: property.rating
+  // Only emit aggregateRating when a REAL rating and review count are present —
+  // fabricated counts (e.g. `reviewCount || 1`) violate Google's Review Snippet
+  // spam policies.
+  aggregateRating: property.rating && (property.reviewCount || property.reviews?.length)
     ? {
         '@type': 'AggregateRating',
         ratingValue: property.rating,
-        reviewCount: property.reviewCount || property.reviews?.length || 1,
+        reviewCount: property.reviewCount || (Array.isArray(property.reviews) ? property.reviews.length : 0),
         bestRating: '5',
       }
     : undefined,
@@ -707,7 +714,7 @@ export const generateBlogStructuredData = ({ authorSchema, schemaMarkup, inLangu
     name: siteMetadata.siteName,
     logo: {
       '@type': 'ImageObject',
-      url: siteMetadata.defaultOgImage
+      url: ORGANIZATION_LOGO_URL
     }
   },
   datePublished: blog.publishedAt || schemaMarkup?.datePublished || new Date().toISOString(),
@@ -736,8 +743,10 @@ export const generateVideoStructuredData = (video) => ({
   name: video.title || '360° Virtual Tour',
   description: video.description || 'Experience this property through our immersive 360° virtual tour',
   thumbnailUrl: video.thumbnail || siteMetadata.defaultOgImage,
-  uploadDate: video.uploadDate || new Date().toISOString(),
-  duration: video.duration || 'PT1M',
+  // Only emit dates/durations when real values are provided — the previous
+  // `new Date().toISOString()` and 'PT1M' fallbacks fabricated data.
+  ...(video.uploadDate ? { uploadDate: video.uploadDate } : {}),
+  ...(video.duration ? { duration: video.duration } : {}),
   contentUrl: video.contentUrl,
   embedUrl: video.embedUrl,
   publisher: {
@@ -745,7 +754,7 @@ export const generateVideoStructuredData = (video) => ({
     name: siteMetadata.siteName,
     logo: {
       '@type': 'ImageObject',
-      url: siteMetadata.defaultOgImage
+      url: ORGANIZATION_LOGO_URL
     }
   }
 });
@@ -788,6 +797,44 @@ export const generatePropertyProductStructuredData = (property) => {
       : { description: 'Contact for price' }),
   };
 
+  // Only emit aggregateRating when REAL rating + review-count data exists —
+  // fabricated counts (`reviewCount || 1`) violate Google's Review Snippet
+  // spam policies.
+  const reviewCount = property.reviewCount
+    || (Array.isArray(property.reviews) ? property.reviews.length : 0);
+  const aggregateRating = property.rating && reviewCount > 0
+    ? {
+        '@type': 'AggregateRating',
+        ratingValue: property.rating,
+        reviewCount,
+        bestRating: '5',
+        worstRating: '1',
+      }
+    : undefined;
+
+  // Only emit reviews that carry real data (numeric rating AND author name) —
+  // fabricated author fallbacks (e.g. 'Verified Buyer') violate Google's
+  // Review Snippet spam policies.
+  const validReviews = Array.isArray(property.reviews)
+    ? property.reviews
+        .filter((review) => review && review.rating != null && review.rating !== '' && review.author_name)
+        .slice(0, 3)
+        .map((review) => ({
+          '@type': 'Review',
+          reviewRating: {
+            '@type': 'Rating',
+            ratingValue: review.rating,
+            bestRating: '5',
+          },
+          author: {
+            '@type': 'Person',
+            name: review.author_name,
+          },
+          reviewBody: review.comment || review.review || '',
+          datePublished: review.created_at || new Date().toISOString(),
+        }))
+    : [];
+
   return {
     '@type': 'Product',
     name: property.title || `${propertyTypeLabel} for ${listingType} in ${locationLabel}`,
@@ -801,40 +848,8 @@ export const generatePropertyProductStructuredData = (property) => {
       name: '360Ghar',
     },
     offers,
-    // Only emit aggregateRating when we have a REAL rating — fabricated
-    // ratings (4.5/50 fallbacks) violate Google's Review/Snippet spam policy.
-    ...(property.rating
-      ? {
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: property.rating,
-            reviewCount: property.reviewCount || property.reviews?.length || 1,
-            bestRating: '5',
-            worstRating: '1',
-          },
-        }
-      : {}),
-    // Only emit reviews that have a real numeric rating — fabricated defaults
-    // (e.g. rating || '4') violate Google's Review Snippet spam policies.
-    review: Array.isArray(property.reviews)
-      ? property.reviews
-          .filter((review) => review && review.rating != null && review.rating !== '')
-          .slice(0, 3)
-          .map((review) => ({
-            '@type': 'Review',
-            reviewRating: {
-              '@type': 'Rating',
-              ratingValue: review.rating,
-              bestRating: '5',
-            },
-            author: {
-              '@type': 'Person',
-              name: review.author_name || 'Verified Buyer',
-            },
-            reviewBody: review.comment || review.review || '',
-            datePublished: review.created_at || new Date().toISOString(),
-          }))
-      : undefined,
+    ...(aggregateRating ? { aggregateRating } : {}),
+    ...(validReviews.length > 0 ? { review: validReviews } : {}),
     additionalProperty: [
       {
         '@type': 'PropertyValue',
@@ -1389,6 +1404,11 @@ export const generateAggregateOfferStructuredData = ({
 /**
  * Generate JobPosting schema for career pages.
  * Library helper reused by validateStructuredData.js (not mounted directly by pages).
+ *
+ * Emits Google's required fields for the Job Posting rich result (title, description,
+ * datePosted, validThrough, employmentType, hiringOrganization, jobLocation, baseSalary)
+ * plus the full PostalAddress (streetAddress/postalCode) that GSC flags as "Missing field"
+ * warnings when absent — matches the inline schema in Careers.jsx / CareerDetails.jsx.
  */
 export const generateJobPostingStructuredData = ({
   title,
@@ -1398,8 +1418,10 @@ export const generateJobPostingStructuredData = ({
   employmentType = 'FULL_TIME',
   jobLocationType = 'ONSITE',
   location = {
+    streetAddress: 'Sector 50, Gurugram',
     addressLocality: 'Gurgaon',
     addressRegion: 'Haryana',
+    postalCode: '122001',
     addressCountry: 'IN',
   },
   baseSalary = {
@@ -1425,8 +1447,10 @@ export const generateJobPostingStructuredData = ({
     '@type': 'Place',
     address: {
       '@type': 'PostalAddress',
+      streetAddress: location.streetAddress,
       addressLocality: location.addressLocality,
       addressRegion: location.addressRegion,
+      postalCode: location.postalCode,
       addressCountry: location.addressCountry,
     },
   },
@@ -1509,7 +1533,7 @@ export const generateArticleStructuredData = ({
     name: '360Ghar',
     logo: {
       '@type': 'ImageObject',
-      url: 'https://360ghar.com/logo.png',
+      url: ORGANIZATION_LOGO_URL,
     },
   },
   datePublished: publishedAt || new Date().toISOString(),

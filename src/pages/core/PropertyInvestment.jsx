@@ -22,17 +22,22 @@ const PropertyInvestment = () => {
       '@type': 'Article',
       headline: t('propertyInvestment.seoTitle'),
       description: t('propertyInvestment.seoDescription'),
-      image: '/assets/images/logo/logo.png',
+      url: 'https://360ghar.com/property-investment-gurugram',
+      image: 'https://360ghar.com/assets/images/logo/logo.png',
       author: {
         '@type': 'Organization',
         name: '360Ghar'
       },
       publisher: {
         '@type': 'Organization',
-        name: '360Ghar'
+        name: '360Ghar',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://360ghar.com/assets/images/logo/logo.png'
+        }
       },
       datePublished: '2024-01-01',
-      dateModified: new Date().toISOString(),
+      dateModified: '2024-01-01',
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': 'https://360ghar.com/property-investment-gurugram'

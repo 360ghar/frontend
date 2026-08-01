@@ -153,11 +153,15 @@ Each item is XML-escaped and dated with `toRfc2822()`. Property titles synthesiz
 - `generateFaqStructuredData`
 - `generateHowToStructuredData`
 - `generatePropertyProductStructuredData` — `Product` with `offers` (a priceless "Contact for price" `Offer` when price data is missing, since `price:0` and offerless Products are both rejected), `aggregateRating`, and `review[]`.
-- `generateJobPostingStructuredData` (library helper; careers pages build JobPosting inline in `Careers.jsx` / `CareerDetails.jsx` with `title`, `datePosted`/`validThrough` sourced from `src/data/careers.js` `postedDate`, `baseSalary`, and a complete `PostalAddress`).
+- `generateJobPostingStructuredData` (library helper; careers pages build JobPosting inline in `Careers.jsx` / `CareerDetails.jsx` with `title`, `datePosted`/`validThrough` sourced from `src/data/careers.js` `postedDate`, `baseSalary`, and a complete `PostalAddress` incl. `streetAddress` + `postalCode`). The helper defaults emit the same complete `PostalAddress` (`Sector 50, Gurugram` / `122001`); `validateStructuredData.js` enforces Google's JobPosting required set (`title`, `description`, `datePosted`, `validThrough`, `employmentType`, `hiringOrganization`, `jobLocation`, `baseSalary`) and warns on missing `streetAddress`/`postalCode` — the exact "Missing field" error/warnings seen in the GSC Job Postings report.
 - Review blocks (`CustomerReviews.jsx`, `ReviewDisplay.jsx`) emit a typed parent (`@type: RealEstateAgent`, a `LocalBusiness` subtype) wrapping `aggregateRating` **and** `review[]` together — a standalone `AggregateRating` with `itemReviewed` is rejected by Google.
 - Tool-page schemas via `src/seo/toolSchemas.js`
 
 These are emitted through `<Helmet>` in each page's `SEO` component (`src/common/SEO.jsx`).
+
+### Field-level validation (CI)
+
+`npm run validate:schemas` (`scripts/validate-structured-data.mjs`) now imports the real validators and runs field-level checks — not just regex presence checks: every `realEstateStructuredData` entry plus representative generator outputs (JobPosting, Article, VideoObject) are run through `validateSchema` and any error fails the build. Rules in `src/seo/validateStructuredData.js` track Google's rich-result required fields (Product offers/aggregateRating/review, Article image/author/publisher, Event endDate/eventStatus/eventAttendanceMode/image, VideoObject uploadDate, JobPosting full set incl. `streetAddress`/`postalCode` warnings, `validThrough` date check); required props use a `== null` check so `x || undefined` emissions are caught; nested errors propagate into `isValid`. Site-wide 2026-08 audit fixed: broken `logo.png`/`office.jpg` URLs → `assets/images/logo/logo.png`; missing `streetAddress` on the sitewide Organization block; fabricated `numberOfItems: 1000`; fabricated aggregateRating/review fallbacks (gated on real data); Event schema on `/bank-auctions/:id`; Article image/publisher.logo on guide pages; `new Date()`-derived dates (static now); fabricated `verifiedCount: 500` ClaimReview on locality pages; `/data-hub/*` soft-404 301s in `public/_redirects` + `netlify.toml`.
 
 ## Canonical, Meta & hreflang
 

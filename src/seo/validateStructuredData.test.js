@@ -16,6 +16,7 @@ import {
   generateLocalityFaqStructuredData,
   generateReviewStructuredData,
   generateArticleStructuredData,
+  generateJobPostingStructuredData,
 } from './structuredData';
 
 describe('Structured Data Validation', () => {
@@ -36,14 +37,115 @@ describe('Structured Data Validation', () => {
     it('detects missing required properties', () => {
       const schema = {
         '@type': 'Organization',
-        name: '360Ghar',
-        // Missing required 'url' and 'logo'
+        // Missing required 'name'
       };
 
       const result = validateSchema(schema, 'TestOrganization');
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors.some(e => e.message.includes('url'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('name'))).toBe(true);
+    });
+
+    it('validates a complete JobPosting with Google-required fields', () => {
+      const schema = {
+        '@type': 'JobPosting',
+        title: 'Software Developer Intern',
+        description: 'Build and maintain web applications.',
+        datePosted: '2026-06-15',
+        validThrough: '2026-08-30',
+        employmentType: 'INTERN',
+        hiringOrganization: {
+          '@type': 'Organization',
+          name: '360Ghar',
+          url: 'https://360ghar.com',
+          description: 'India\'s VR-First Way to Find a Home.',
+          logo: { '@type': 'ImageObject', url: 'https://360ghar.com/logo.png' },
+        },
+        jobLocation: {
+          '@type': 'Place',
+          name: '360Ghar Office',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: 'Sector 50, Gurugram',
+            addressLocality: 'Gurugram',
+            addressRegion: 'Haryana',
+            postalCode: '122001',
+            addressCountry: 'IN',
+          },
+        },
+        baseSalary: {
+          '@type': 'MonetaryAmount',
+          currency: 'INR',
+          value: {
+            '@type': 'QuantitativeValue',
+            value: 15000,
+            unitText: 'MONTH',
+          },
+        },
+      };
+
+      const result = validateSchema(schema, 'TestJobPosting');
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+      expect(result.warnings).toHaveLength(0);
+    });
+
+    it('flags a JobPosting missing Google-required fields (title, baseSalary, etc.)', () => {
+      const schema = {
+        '@type': 'JobPosting',
+        description: 'Missing title, dates, salary and more',
+      };
+
+      const result = validateSchema(schema, 'TestJobPosting');
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.message.includes('title'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('baseSalary'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('datePosted'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('validThrough'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('hiringOrganization'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('jobLocation'))).toBe(true);
+    });
+
+    it('warns when jobLocation.address lacks streetAddress/postalCode (GSC "Missing field" warnings)', () => {
+      const schema = {
+        '@type': 'JobPosting',
+        title: 'Content Creator Intern',
+        description: 'Create engaging real estate content.',
+        datePosted: '2026-06-01',
+        validThrough: '2026-08-30',
+        employmentType: 'INTERN',
+        hiringOrganization: {
+          '@type': 'Organization',
+          name: '360Ghar',
+          url: 'https://360ghar.com',
+          logo: { '@type': 'ImageObject', url: 'https://360ghar.com/logo.png' },
+        },
+        jobLocation: {
+          '@type': 'Place',
+          name: '360Ghar Office',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Gurugram',
+            addressRegion: 'Haryana',
+            addressCountry: 'IN',
+          },
+        },
+        baseSalary: {
+          '@type': 'MonetaryAmount',
+          currency: 'INR',
+          value: {
+            '@type': 'QuantitativeValue',
+            value: 15000,
+            unitText: 'MONTH',
+          },
+        },
+      };
+
+      const result = validateSchema(schema, 'TestJobPosting');
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+      expect(result.warnings.some(w => w.message.includes('streetAddress'))).toBe(true);
+      expect(result.warnings.some(w => w.message.includes('postalCode'))).toBe(true);
     });
 
     it('validates Event schema with all required fields', () => {
@@ -51,6 +153,10 @@ describe('Structured Data Validation', () => {
         '@type': 'Event',
         name: 'Property Expo',
         startDate: '2026-06-15T10:00:00+05:30',
+        endDate: '2026-06-15T18:00:00+05:30',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        eventStatus: 'https://schema.org/EventScheduled',
+        image: 'https://360ghar.com/og-image-home.jpg',
         location: {
           '@type': 'Place',
           name: '360Ghar Office',
@@ -161,6 +267,120 @@ describe('Structured Data Validation', () => {
 
       const result = validateSchema(schema, 'TestRating');
       expect(result.errors.some(e => e.message.includes('Rating'))).toBe(true);
+    });
+
+    it('flags required properties explicitly set to undefined (the || undefined class)', () => {
+      const schema = {
+        '@type': 'JobPosting',
+        title: undefined,
+        description: 'A posting whose title was conditionally dropped',
+        datePosted: '2026-06-01',
+        validThrough: '2026-08-30',
+        employmentType: 'INTERN',
+        hiringOrganization: { '@type': 'Organization', name: '360Ghar' },
+        jobLocation: { '@type': 'Place' },
+        baseSalary: { '@type': 'MonetaryAmount' },
+      };
+
+      const result = validateSchema(schema, 'TestJobPosting');
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.message.includes('title'))).toBe(true);
+    });
+
+    it('propagates nested validation errors into isValid', () => {
+      const schema = {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What is the price?',
+            // Missing acceptedAnswer -> nested error must flip isValid
+          },
+        ],
+      };
+
+      const result = validateSchema(schema, 'TestFAQ');
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.message.includes('acceptedAnswer'))).toBe(true);
+    });
+
+    it('requires Product to have offers, aggregateRating or review', () => {
+      const schema = {
+        '@type': 'Product',
+        name: '2 BHK Apartment',
+        image: 'https://360ghar.com/og-image-home.jpg',
+        // No offers / aggregateRating / review
+      };
+
+      const result = validateSchema(schema, 'TestProduct');
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.message.includes('offers'))).toBe(true);
+    });
+
+    it('requires price, priceCurrency and availability on Product offers', () => {
+      const schema = {
+        '@type': 'Product',
+        name: '2 BHK Apartment',
+        image: 'https://360ghar.com/og-image-home.jpg',
+        offers: {
+          '@type': 'Offer',
+          price: 7500000,
+          // Missing priceCurrency and availability
+        },
+      };
+
+      const result = validateSchema(schema, 'TestProduct');
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.message.includes('priceCurrency'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('availability'))).toBe(true);
+    });
+
+    it('flags an Event missing eventStatus', () => {
+      const schema = {
+        '@type': 'Event',
+        name: 'Property Auction',
+        startDate: '2026-07-01T10:00:00+05:30',
+        endDate: '2026-07-01T18:00:00+05:30',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        image: 'https://360ghar.com/og-image-home.jpg',
+        location: { '@type': 'Place', name: 'Gurugram' },
+        // Missing eventStatus
+      };
+
+      const result = validateSchema(schema, 'TestEvent');
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some(e => e.message.includes('eventStatus'))).toBe(true);
+    });
+
+    it('warns when VideoObject lacks contentUrl/embedUrl', () => {
+      const schema = {
+        '@type': 'VideoObject',
+        name: '360° Virtual Tour',
+        description: 'Immersive tour',
+        thumbnailUrl: 'https://360ghar.com/og-image-home.jpg',
+        uploadDate: '2026-06-01',
+      };
+
+      const result = validateSchema(schema, 'TestVideo');
+      expect(result.isValid).toBe(true);
+      expect(result.warnings.some(w => w.message.includes('contentUrl'))).toBe(true);
+    });
+
+    it('validates validThrough as a date', () => {
+      const schema = {
+        '@type': 'JobPosting',
+        title: 'Test Intern',
+        description: 'Test',
+        datePosted: '2026-06-01',
+        validThrough: 'not-a-date',
+        employmentType: 'INTERN',
+        hiringOrganization: { '@type': 'Organization', name: '360Ghar' },
+        jobLocation: { '@type': 'Place' },
+        baseSalary: { '@type': 'MonetaryAmount' },
+      };
+
+      const result = validateSchema(schema, 'TestJobPosting');
+      expect(result.errors.some(e => e.message.includes('validThrough'))).toBe(true);
     });
 
     it('validates FAQ schema with property-specific questions', () => {
@@ -355,6 +575,21 @@ describe('Structured Data Validation', () => {
         description: 'Test description',
       });
       expect(schema['@type']).toBe('Article');
+    });
+
+    it('includes JobPosting schema with Google-required fields', () => {
+      const schema = generateJobPostingStructuredData({
+        title: 'Content Creator Intern',
+        description: 'Create engaging real estate content.',
+        datePosted: '2026-06-01',
+      });
+      expect(schema['@type']).toBe('JobPosting');
+      expect(schema.title).toBe('Content Creator Intern');
+      expect(schema.datePosted).toBe('2026-06-01');
+      expect(schema.validThrough).toBeTruthy();
+      expect(schema.jobLocation.address.streetAddress).toBe('Sector 50, Gurugram');
+      expect(schema.jobLocation.address.postalCode).toBe('122001');
+      expect(schema.baseSalary['@type']).toBe('MonetaryAmount');
     });
   });
 });

@@ -84,10 +84,10 @@ const PropertyDetails = () => {
                 : [siteMetadata.defaultOgImage],
             address: {
                 '@type': 'PostalAddress',
-                streetAddress: propertyData.full_address || propertyData.locality || 'Gurgaon',
-                addressLocality: propertyData.city || 'Gurgaon',
+                ...(propertyData.full_address || propertyData.locality ? { streetAddress: propertyData.full_address || propertyData.locality } : {}),
+                ...(propertyData.city ? { addressLocality: propertyData.city } : {}),
                 addressRegion: 'Haryana',
-                postalCode: propertyData.pincode || '122001',
+                ...(propertyData.pincode ? { postalCode: propertyData.pincode } : {}),
                 addressCountry: 'IN'
             },
             geo: propertyData.lat && propertyData.lng ? {
@@ -95,14 +95,16 @@ const PropertyDetails = () => {
                 latitude: propertyData.lat,
                 longitude: propertyData.lng
             } : undefined,
-            numberOfRooms: propertyData.bhk || 1,
-            numberOfBedrooms: propertyData.bedrooms || propertyData.bhk || 1,
-            numberOfBathroomsTotal: propertyData.bathrooms || 1,
-            floorSize: {
-                '@type': 'QuantitativeValue',
-                value: propertyData.area_sqft || 1000,
-                unitCode: 'FTK'
-            },
+            ...(propertyData.bhk ? { numberOfRooms: propertyData.bhk } : {}),
+            ...(propertyData.bhk ?? propertyData.bedrooms ? { numberOfBedrooms: propertyData.bhk ?? propertyData.bedrooms } : {}),
+            ...(propertyData.bathrooms ? { numberOfBathroomsTotal: propertyData.bathrooms } : {}),
+            ...(propertyData.area_sqft ? {
+                floorSize: {
+                    '@type': 'QuantitativeValue',
+                    value: propertyData.area_sqft,
+                    unitCode: 'FTK'
+                }
+            } : {}),
             accommodationCategory: propertyTypeLabel,
             amenities: propertyData.amenities || [],
             petsAllowed: propertyData.amenities?.includes('pet-friendly') ? true : false,
@@ -118,9 +120,8 @@ const PropertyDetails = () => {
                 propertyType: propertyData.property_type,
                 purpose: propertyData.purpose,
             }),
-            datePosted: propertyData.created_at,
-            price: priceValue,
-            priceCurrency: 'INR',
+            ...(propertyData.created_at ? { datePosted: propertyData.created_at } : {}),
+            ...(priceValue ? { price: priceValue, priceCurrency: 'INR' } : {}),
             availability: propertyData.is_available !== false
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
@@ -153,7 +154,7 @@ const PropertyDetails = () => {
                     thumbnail: Array.isArray(propertyData.images) && propertyData.images[0]?.image_url
                         ? propertyData.images[0].image_url
                         : undefined,
-                    uploadDate: propertyData.created_at || undefined,
+                    uploadDate: propertyData.created_at,
                     contentUrl: virtualTourUrl,
                 })
             );

@@ -659,7 +659,7 @@ const LocalityTemplate = () => {
                 }
             }))
         },
-        ...generateEeaSignals({ verifiedCount: 500 }),
+        ...generateEeaSignals({}),
     ];
 
     return (

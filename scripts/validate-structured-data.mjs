@@ -12,6 +12,13 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { validateSchema } from '../src/seo/validateStructuredData.js';
+import {
+  realEstateStructuredData,
+  generateJobPostingStructuredData,
+  generateArticleStructuredData,
+  generateVideoStructuredData,
+} from '../src/seo/structuredData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -157,6 +164,52 @@ pageFiles.forEach(file => {
 
 console.log(`✅ Found structured data in ${pagesWithStructuredData}/${pageFiles.length} pages`);
 
+// Field-level validation — regex checks above cannot see missing Google-required
+// fields (e.g. the old careers JobPosting bug: missing title/streetAddress/
+// postalCode/baseSalary), so run the real validator on shipped data + samples.
+console.log('\n🧪 Field-level schema validation...\n');
+
+let fieldValidationFailed = false;
+
+const validateShipped = (name, schema) => {
+  const result = validateSchema(schema, name);
+  result.errors.forEach(e => console.log(`  ❌ ${e.path}: ${e.message}`));
+  result.warnings.forEach(w => console.log(`  ⚠️  ${w.path}: ${w.message}`));
+  if (result.errors.length > 0) {
+    fieldValidationFailed = true;
+  }
+  return result;
+};
+
+Object.entries(realEstateStructuredData).forEach(([key, schema]) => {
+  const result = validateShipped(`realEstateStructuredData.${key}`, schema);
+  console.log(`  ${result.errors.length === 0 ? '✅' : '❌'} ${key} (${result.errors.length} errors, ${result.warnings.length} warnings)`);
+});
+
+const generatorSamples = {
+  JobPosting: generateJobPostingStructuredData({
+    title: 'Test Intern',
+    description: 'Test description',
+    datePosted: '2026-06-01',
+  }),
+  Article: generateArticleStructuredData({
+    headline: 'Test Article',
+    description: 'Test description',
+    publishedAt: '2026-06-01',
+  }),
+  VideoObject: generateVideoStructuredData({
+    title: 'Test Video',
+    description: 'Test description',
+    contentUrl: 'https://360ghar.com/tour.mp4',
+    uploadDate: '2026-06-01',
+  }),
+};
+
+Object.entries(generatorSamples).forEach(([name, schema]) => {
+  const result = validateShipped(`generated:${name}`, schema);
+  console.log(`  ${result.errors.length === 0 ? '✅' : '❌'} ${name} sample (${result.errors.length} errors, ${result.warnings.length} warnings)`);
+});
+
 // Final summary
 console.log('\n' + '='.repeat(60));
 console.log('📊 VALIDATION SUMMARY');
@@ -165,9 +218,10 @@ console.log(`Schema Types: ${allSchemasPresent ? '✅ All Present' : '❌ Some M
 console.log(`Generator Functions: ${allGeneratorsPresent ? '✅ All Present' : '❌ Some Missing'}`);
 console.log(`AI Discovery Files: ${allAIFilesPresent ? '✅ All Present' : '❌ Some Missing'}`);
 console.log(`Pages with Structured Data: ${pagesWithStructuredData}/${pageFiles.length}`);
+console.log(`Field-level Schemas: ${fieldValidationFailed ? '❌ Errors Found' : '✅ All Valid'}`);
 console.log('='.repeat(60));
 
-if (allSchemasPresent && allGeneratorsPresent && allAIFilesPresent) {
+if (allSchemasPresent && allGeneratorsPresent && allAIFilesPresent && !fieldValidationFailed) {
   console.log('\n✅ All structured data validations passed!');
   console.log('🚀 Ready for production deployment\n');
   process.exit(0);
