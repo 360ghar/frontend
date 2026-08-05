@@ -9,7 +9,7 @@ import Cta from '../../components/ui/Cta';
 import SEO from '../../common/SEO';
 import { siteMetadata } from '../../seo/siteMetadata';
 import { careerFaqStructuredData } from '../../seo/structuredData';
-import { careerOpenings } from '../../data/careers';
+import { openCareerOpenings } from '../../data/careers';
 
 const CAREER_VALUES = [
   { icon: 'fas fa-rocket', text: 'Build products real people use daily' },
@@ -56,11 +56,11 @@ const Careers = () => {
   const [category, setCategory] = useState('all');
 
   const categories = useMemo(() => {
-    const set = new Set(careerOpenings.map(deriveCategory));
+    const set = new Set(openCareerOpenings.map(deriveCategory));
     return ['all', ...Array.from(set)];
   }, []);
 
-  const filteredOpenings = useMemo(() => careerOpenings.filter((opening) => {
+  const filteredOpenings = useMemo(() => openCareerOpenings.filter((opening) => {
     const matchesQuery = !query
       || opening.title.toLowerCase().includes(query.toLowerCase())
       || opening.description.toLowerCase().includes(query.toLowerCase());
@@ -72,8 +72,8 @@ const Careers = () => {
     {
       '@type': 'CollectionPage',
       name: 'Internships at 360Ghar',
-      description: 'Explore internship opportunities at 360Ghar across content, real estate, and technology.',
-      hasPart: careerOpenings.map((opening) => ({
+      description: 'Explore internship opportunities at 360Ghar across content, real estate, and the founder\'s office.',
+      hasPart: openCareerOpenings.map((opening) => ({
         '@type': 'JobPosting',
         name: opening.title,
         title: opening.title,
@@ -124,7 +124,7 @@ const Careers = () => {
       <SEO
         title={tSeo('careers.title')}
         description={tSeo('careers.description')}
-        keywords="360Ghar careers, internships in Gurugram, content creator internship, real estate agent internship, software developer internship, software developer intern, 360Ghar hiring, tech internships Gurugram, prop-tech internships India, real estate startup jobs"
+        keywords="360Ghar careers, internships in Gurugram, content creator internship, real estate agent internship, founder's office internship, 360Ghar hiring, prop-tech internships India, real estate startup jobs"
         canonical="/careers"
         image={siteMetadata.defaultOgImage}
         type="website"
@@ -224,9 +224,12 @@ const Careers = () => {
             <div className="row g-4 g-lg-5">
               {filteredOpenings.map((opening) => (
                 <div className="col-lg-6 col-xl-4" key={opening.slug}>
-                  <article className="careers-card h-100 shadow-sm border-0 rounded-4 overflow-hidden transition-all">
-                    <div className="careers-card__header bg-gradient"></div>
-                    <div className="card-body d-flex flex-column p-4 p-lg-5">
+                  {/* h-100 + flex column so every card body fills the row height and
+                      mt-auto lands each "View Details" button on the same baseline,
+                      whatever the length of the location/duration lines above it. */}
+                  <article className="careers-card h-100 d-flex flex-column shadow-sm border-0 rounded-4 overflow-hidden transition-all">
+                    <div className="careers-card__header bg-gradient flex-shrink-0"></div>
+                    <div className="card-body d-flex flex-column flex-grow-1 p-4 p-lg-5">
                       <div className="d-flex align-items-start gap-3 mb-3">
                         <div className="careers-card__icon d-flex align-items-center justify-content-center flex-shrink-0">
                           <i className={opening.icon || 'fas fa-briefcase'}></i>

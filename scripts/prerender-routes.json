@@ -97,6 +97,18 @@
     "waitForSelector": "main"
   },
   {
+    "route": "/mofa-to-rera-converter",
+    "waitForSelector": "main"
+  },
+  {
+    "route": "/sq-ft-calculator",
+    "waitForSelector": "main"
+  },
+  {
+    "route": "/acre-in-gaj",
+    "waitForSelector": "main"
+  },
+  {
     "route": "/loan-eligibility-calculator",
     "waitForSelector": "main"
   },
@@ -154,6 +166,18 @@
   },
   {
     "route": "/builder-reputation",
+    "waitForSelector": "main"
+  },
+  {
+    "route": "/builder-reputation-score",
+    "waitForSelector": "main"
+  },
+  {
+    "route": "/tenant-demand-heatmap",
+    "waitForSelector": "main"
+  },
+  {
+    "route": "/best-sectors-investment-2026",
     "waitForSelector": "main"
   },
   {
@@ -229,7 +253,7 @@
     "waitForSelector": "main"
   },
   {
-    "route": "/careers/software-developer-intern",
+    "route": "/careers/founders-office-intern",
     "waitForSelector": "main"
   },
   {
@@ -351,16 +375,15 @@
     "waitForTitle": "Add Listing | 360Ghar"
   },
   {
-    "route": "/mcp/login",
-    "waitForSelector": "main",
-    "waitForTitle": "Connect AI Assistant | 360Ghar"
-  },
-  {
     "route": "/map-location",
     "waitForSelector": "main"
   },
   {
     "route": "/property-sidebar",
+    "waitForSelector": "main"
+  },
+  {
+    "route": "/careers/software-developer-intern",
     "waitForSelector": "main"
   },
   {
@@ -603,6 +626,18 @@
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {
+    "route": "/hi/mofa-to-rera-converter",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/sq-ft-calculator",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/acre-in-gaj",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
     "route": "/hi/loan-eligibility-calculator",
     "waitForSelector": "html[lang=\"hi\"] main"
   },
@@ -660,6 +695,18 @@
   },
   {
     "route": "/hi/builder-reputation",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/builder-reputation-score",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/tenant-demand-heatmap",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/best-sectors-investment-2026",
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {
@@ -735,7 +782,7 @@
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {
-    "route": "/hi/careers/software-developer-intern",
+    "route": "/hi/careers/founders-office-intern",
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {
@@ -851,15 +898,15 @@
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {
-    "route": "/hi/mcp/login",
-    "waitForSelector": "html[lang=\"hi\"] main"
-  },
-  {
     "route": "/hi/map-location",
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {
     "route": "/hi/property-sidebar",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/careers/software-developer-intern",
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {

@@ -36,6 +36,25 @@ export const careerOpenings = [
     postedDate: '2026-06-08',
   },
   {
+    slug: 'founders-office-intern',
+    icon: 'fas fa-compass',
+    title: 'Founder\'s Office Intern',
+    description:
+      'Work directly with the founder on strategy, operations, and execution across every part of 360Ghar. You will run market and competitor research, turn open-ended problems into decision-ready analysis, prepare investor and partner material, and drive cross-team projects to completion. A wide-lens role for someone who wants to see how a startup is actually built.',
+    requirements: [
+      'Structured thinking — able to break an open-ended problem into a clear, defensible analysis',
+      'Excellent written and verbal communication in English',
+      'Comfort with spreadsheets and data — building a case from numbers, not opinions',
+      'Familiarity with AI tools for research, drafting, and analysis',
+      'High ownership and follow-through with minimal supervision',
+      'Interest in real estate, prop-tech, or early-stage startups',
+    ],
+    location: 'Gurugram, Haryana',
+    type: 'internship',
+    duration: '2-6 months (extendable based on performance)',
+    postedDate: '2026-08-06',
+  },
+  {
     slug: 'software-developer-intern',
     icon: 'fas fa-laptop-code',
     title: 'Software Developer Intern',
@@ -53,5 +72,16 @@ export const careerOpenings = [
     type: 'internship',
     duration: '2-6 months (extendable based on performance)',
     postedDate: '2026-06-15',
+    status: 'closed',
+    closedDate: '2026-08-05',
   },
 ];
+
+/**
+ * An opening with no explicit status is open. Closed openings are hidden from
+ * the careers listing and drop their JobPosting schema, but keep their detail
+ * URL alive as a noindex page so an indexed URL never becomes a soft 404.
+ */
+export const isOpeningOpen = (opening) => opening?.status !== 'closed';
+
+export const openCareerOpenings = careerOpenings.filter(isOpeningOpen);

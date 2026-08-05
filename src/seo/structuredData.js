@@ -1565,7 +1565,7 @@ export const careerFaqStructuredData = {
       name: 'What internships are available at 360Ghar?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '360Ghar currently offers internships for Content Creator Intern, Real Estate Agent, and Software Developer Intern roles. All positions are based in Gurugram, Haryana and run for 2-6 months with the possibility of extension based on performance.',
+        text: '360Ghar currently offers internships for Content Creator Intern, Real Estate Agent, and Founder\'s Office Intern roles. All positions are based in Gurugram, Haryana and run for 2-6 months with the possibility of extension based on performance.',
       },
     },
     {
@@ -1581,7 +1581,7 @@ export const careerFaqStructuredData = {
       name: 'What is the duration of internships at 360Ghar?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Internships at 360Ghar typically last 2-6 months. Some roles may be extended based on performance and mutual fit. The real estate agent and software developer roles specifically mention extendable durations.',
+        text: 'Internships at 360Ghar typically last 2-6 months. Some roles may be extended based on performance and mutual fit. The real estate agent role specifically mentions an extendable duration.',
       },
     },
     {

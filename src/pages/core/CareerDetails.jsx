@@ -9,7 +9,7 @@ import OffCanvas from '../../common/layout/OffCanvas';
 import Cta from '../../components/ui/Cta';
 import SEO from '../../common/SEO';
 import { siteMetadata } from '../../seo/siteMetadata';
-import { careerOpenings } from '../../data/careers';
+import { careerOpenings, isOpeningOpen } from '../../data/careers';
 
 const CAREERS_EMAIL = 'info@360ghar.com';
 
@@ -41,6 +41,12 @@ const CAREER_DETAILS_LAYOUT = {
       description:
         'As a Real Estate Agent Intern at 360Ghar, you will work side-by-side with our brokerage team to connect buyers, sellers, and investors with the right properties in Gurugram. You will conduct property showings, maintain client relationships, negotiate deals, and leverage AI tools for lead scoring and property matching. This is a hands-on role where you will learn the end-to-end property transaction cycle.',
     },
+    'Founder\'s Office Intern': {
+      icon: 'fas fa-compass',
+      color: '#d97706',
+      description:
+        'As a Founder\'s Office Intern at 360Ghar, you will sit beside the founder and work on whatever matters most that week — market and competitor research, pricing and unit-economics analysis, investor and partner material, hiring support, and the operational glue that keeps a small team shipping. You will own projects end to end: write the memo that frames a decision, then help execute it alongside the content, engineering, and field teams. It is the fastest way to learn how an early-stage company actually runs, and you will leave with real judgement rather than theory.',
+    },
     'Software Developer Intern': {
       icon: 'fas fa-laptop-code',
       color: '#2563eb',
@@ -66,6 +72,9 @@ const CareerDetails = () => {
   );
 
   const expandedDesc = opening ? getExpandedDescription(opening.title) : '';
+  // A closed role keeps its URL (no soft 404) but stops advertising itself:
+  // hidden from the listing, no JobPosting schema, noindex, no apply CTA.
+  const isClosed = Boolean(opening) && !isOpeningOpen(opening);
 
   if (!opening) {
     return (
@@ -177,7 +186,8 @@ const CareerDetails = () => {
         canonical={`/careers/${opening.slug}`}
         image={siteMetadata.defaultOgImage}
         type="website"
-        structuredData={jobPostingSchema}
+        structuredData={isClosed ? undefined : jobPostingSchema}
+        noindex={isClosed}
       />
 
       <OffCanvas />
@@ -221,9 +231,27 @@ const CareerDetails = () => {
                   </div>
                   <div>
                     <h1 className="h3 fw-bold mb-0">{opening.title}</h1>
-                    <p className="text-muted small mb-0">Internship</p>
+                    <p className="text-muted small mb-0">
+                      {isClosed ? 'Internship — position closed' : 'Internship'}
+                    </p>
                   </div>
                 </div>
+
+                {isClosed && (
+                  <div className="d-flex align-items-start gap-3 p-3 p-lg-4 rounded-4 border" role="status">
+                    <i className="fas fa-exclamation-circle text-warning mt-1 flex-shrink-0"></i>
+                    <div>
+                      <p className="fw-semibold mb-1">This position is no longer accepting applications.</p>
+                      <p className="text-secondary small mb-0">
+                        The details below are kept for reference.{' '}
+                        <I18nLink to="/careers" className="text-main text-decoration-none">
+                          See our open internships
+                        </I18nLink>
+                        .
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -310,38 +338,67 @@ const CareerDetails = () => {
               <div className="col-lg-4">
                 <div className="card border-0 shadow-sm rounded-4 sticky-lg-top" style={{ top: '2rem' }}>
                   <div className="card-body p-4">
-                    <h3 className="h5 fw-bold mb-3">Ready to Apply?</h3>
-                    <p className="text-secondary small mb-4">
-                      Send your resume, portfolio, or a quick note about yourself to our team.
-                    </p>
+                    {isClosed ? (
+                      <>
+                        <h3 className="h5 fw-bold mb-3">This role is closed</h3>
+                        <p className="text-secondary small mb-4">
+                          We have stopped accepting applications for this position.
+                        </p>
 
-                    <div className="mb-4">
-                      <a
-                        href={mailtoLink}
-                        className="btn btn-main w-100 mb-2"
-                        role="button"
-                      >
-                        <i className="fas fa-paper-plane me-2"></i>
-                        Apply Now
-                      </a>
-                      <a
-                        href={`mailto:${CAREERS_EMAIL}`}
-                        className="btn btn-outline-main w-100"
-                        role="button"
-                      >
-                        <i className="fas fa-envelope me-2"></i>
-                        Open Email Client
-                      </a>
-                    </div>
+                        <div className="mb-4">
+                          <I18nLink to="/careers" className="btn btn-main w-100">
+                            <i className="fas fa-arrow-left me-2"></i>
+                            Browse open internships
+                          </I18nLink>
+                        </div>
 
-                    <hr />
+                        <hr />
 
-                    <div className="text-center">
-                      <p className="text-muted small mb-2">Or email us directly at</p>
-                      <a href={`mailto:${CAREERS_EMAIL}`} className="text-main fw-semibold small text-decoration-none">
-                        {CAREERS_EMAIL}
-                      </a>
-                    </div>
+                        <div className="text-center">
+                          <p className="text-muted small mb-2">
+                            To be considered for future openings, email
+                          </p>
+                          <a href={`mailto:${CAREERS_EMAIL}`} className="text-main fw-semibold small text-decoration-none">
+                            {CAREERS_EMAIL}
+                          </a>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="h5 fw-bold mb-3">Ready to Apply?</h3>
+                        <p className="text-secondary small mb-4">
+                          Send your resume, portfolio, or a quick note about yourself to our team.
+                        </p>
+
+                        <div className="mb-4">
+                          <a
+                            href={mailtoLink}
+                            className="btn btn-main w-100 mb-2"
+                            role="button"
+                          >
+                            <i className="fas fa-paper-plane me-2"></i>
+                            Apply Now
+                          </a>
+                          <a
+                            href={`mailto:${CAREERS_EMAIL}`}
+                            className="btn btn-outline-main w-100"
+                            role="button"
+                          >
+                            <i className="fas fa-envelope me-2"></i>
+                            Open Email Client
+                          </a>
+                        </div>
+
+                        <hr />
+
+                        <div className="text-center">
+                          <p className="text-muted small mb-2">Or email us directly at</p>
+                          <a href={`mailto:${CAREERS_EMAIL}`} className="text-main fw-semibold small text-decoration-none">
+                            {CAREERS_EMAIL}
+                          </a>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

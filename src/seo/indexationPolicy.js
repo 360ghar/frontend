@@ -68,7 +68,7 @@ export const indexableStaticRoutes = [
   '/careers',
   '/careers/content-creator-internship',
   '/careers/real-estate-agent',
-  '/careers/software-developer-intern',
+  '/careers/founders-office-intern',
   '/celebrity-homes',
   '/nri-property-guide',
   '/list-property-free',
@@ -102,6 +102,9 @@ export const noindexPrerenderRoutes = [
   '/add-new-listing',
   '/map-location',
   '/property-sidebar',
+  // Closed career openings: dropped from the sitemap but still prerendered so
+  // the already-indexed URL serves real noindex HTML instead of a soft 404.
+  '/careers/software-developer-intern',
 ];
 
 export const seedLocalityPrerenderRoutes = [
