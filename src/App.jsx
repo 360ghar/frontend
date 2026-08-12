@@ -66,6 +66,7 @@ const Careers = lazy(() => import('./pages/core/Careers'));
 const CareerDetails = lazy(() => import('./pages/core/CareerDetails'));
 const CelebrityHomesHub = lazy(() => import('./pages/core/CelebrityHomesHub'));
 const NriPropertyGuide = lazy(() => import('./pages/core/NriPropertyGuide'));
+const SecurityDepositGuide = lazy(() => import('./pages/core/SecurityDepositGuide'));
 const ListPropertyFree = lazy(() => import('./pages/core/ListPropertyFree'));
 const Glossary = lazy(() => import('./pages/core/Glossary'));
 const FakeListingChecker = lazy(() => import('./pages/tools/FakeListingChecker'));
@@ -156,6 +157,7 @@ const contentRoutes = [
   { path: '/ai-agent', element: <AIAgent /> },
   { path: '/celebrity-homes', element: <CelebrityHomesHub /> },
   { path: '/nri-property-guide', element: <NriPropertyGuide /> },
+  { path: '/landlord-not-returning-security-deposit', element: <SecurityDepositGuide /> },
   { path: '/list-property-free', element: <ListPropertyFree /> },
   { path: '/glossary', element: <Glossary /> },
   { path: '/links', element: <Links /> },

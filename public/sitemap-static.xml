@@ -1026,6 +1026,22 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/nri-property-guide" />
   </url>
   <url>
+    <loc>https://360ghar.com/landlord-not-returning-security-deposit</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/landlord-not-returning-security-deposit" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/landlord-not-returning-security-deposit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/landlord-not-returning-security-deposit" />
+  </url>
+  <url>
+    <loc>https://360ghar.com/hi/landlord-not-returning-security-deposit</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://360ghar.com/landlord-not-returning-security-deposit" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://360ghar.com/hi/landlord-not-returning-security-deposit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://360ghar.com/landlord-not-returning-security-deposit" />
+  </url>
+  <url>
     <loc>https://360ghar.com/list-property-free</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

@@ -265,6 +265,10 @@
     "waitForSelector": "main"
   },
   {
+    "route": "/landlord-not-returning-security-deposit",
+    "waitForSelector": "main"
+  },
+  {
     "route": "/list-property-free",
     "waitForSelector": "main"
   },
@@ -791,6 +795,10 @@
   },
   {
     "route": "/hi/nri-property-guide",
+    "waitForSelector": "html[lang=\"hi\"] main"
+  },
+  {
+    "route": "/hi/landlord-not-returning-security-deposit",
     "waitForSelector": "html[lang=\"hi\"] main"
   },
   {

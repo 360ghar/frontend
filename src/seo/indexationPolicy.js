@@ -71,6 +71,7 @@ export const indexableStaticRoutes = [
   '/careers/founders-office-intern',
   '/celebrity-homes',
   '/nri-property-guide',
+  '/landlord-not-returning-security-deposit',
   '/list-property-free',
   '/glossary',
   '/links',

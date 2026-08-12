@@ -20,6 +20,7 @@ export const aiDiscoveryImportantPages = [
   { title: 'For AI Assistants', url: `${siteUrl}/for-ai` },
   { title: 'AI Agent', url: `${siteUrl}/ai-agent` },
   { title: 'Gurugram Real Estate Guide', url: `${siteUrl}/gurugram-real-estate-guide` },
+  { title: 'Landlord Not Returning Security Deposit? Guide', url: `${siteUrl}/landlord-not-returning-security-deposit`, category: 'guides' },
   { title: 'EMI Calculator', url: `${siteUrl}/emi-calculator` },
   { title: 'Stamp Duty Calculator', url: `${siteUrl}/stamp-duty-calculator` },
   { title: 'Circle Rates', url: `${siteUrl}/circle-rates` },
@@ -91,6 +92,7 @@ const pageCategories = {
   dataHub: aiDiscoveryImportantPages.filter(p => p.category === 'dataHub'),
   landing: aiDiscoveryImportantPages.filter(p => p.category === 'landing'),
   locality: aiDiscoveryImportantPages.filter(p => p.category === 'locality'),
+  guides: aiDiscoveryImportantPages.filter(p => p.category === 'guides'),
   hindi: aiDiscoveryImportantPages.filter(p => p.category === 'hindi'),
 };
 

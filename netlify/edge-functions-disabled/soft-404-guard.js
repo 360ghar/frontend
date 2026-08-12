@@ -38,6 +38,7 @@ const STATIC_ROUTES = [
   'ai-agent',
   'celebrity-homes',
   'nri-property-guide',
+  'landlord-not-returning-security-deposit',
   'list-property-free',
   'glossary',
   'links',

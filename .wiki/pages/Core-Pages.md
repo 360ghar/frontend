@@ -11,6 +11,8 @@ Core pages are the content and policy surfaces of 360Ghar that are not property 
 | `/faq` | `src/pages/core/FaqPage.jsx` | FAQ page with FAQPage structured data |
 | `/gurugram-real-estate-guide` | `src/pages/core/GurugramGuide.jsx` | Long-form Gurugram market guide |
 | `/property-investment-gurugram` | `src/pages/core/PropertyInvestment.jsx` | Investment guide for Gurugram |
+| `/nri-property-guide` | `src/pages/core/NriPropertyGuide.jsx` | Long-form NRI buying guide with FAQ/HowTo schemas |
+| `/landlord-not-returning-security-deposit` | `src/pages/core/SecurityDepositGuide.jsx` | Tenant-rights guide: security deposit refund laws, state-wise rules, recovery steps |
 | `/for-ai` | `src/pages/core/ForAI.jsx` | AI assistant / LLM crawling guidance |
 | `/policies` | `src/pages/core/Policies.jsx` | List of legal policy pages |
 | `/policies/:slug` | `src/pages/core/PolicyDetails.jsx` | Individual policy page (dynamic) |
@@ -37,6 +39,10 @@ Long-form SEO guide to buying, selling, and renting in Gurugram. Uses `I18nLink`
 ### PropertyInvestment (`/property-investment-gurugram`)
 
 Investment-focused companion to the Gurugram guide. Same `Article` + `BreadcrumbList` pattern, with breadcrumbs built from `propertyInvestment.breadcrumbHome` / `breadcrumbCurrent` keys. Cross-links to the main guide and property search.
+
+### SecurityDepositGuide (`/landlord-not-returning-security-deposit`)
+
+Long-form tenant-rights guide on recovering a withheld security deposit. Follows the `NriPropertyGuide` pattern: hardcoded English body copy with SEO meta from the `seo` namespace (`securityDepositGuide.*` keys, EN + HI). Emits `BreadcrumbList`, `Article` (dated), `FAQPage` (12-question accordion), `HowTo` (10-step recovery plan), and `QAPage` schemas, plus `.speakable-summary` / `.speakable-highlights` blocks for voice-search capture. Content distinguishes verified statutory rules (Model Tenancy Act 2021 caps; Tamil Nadu Tenancy Act 2017 Section 11) from market practice, and carries a legal disclaimer. Registered in `indexableStaticRoutes` (sitemap + prerender) and the AI discovery feed.
 
 ### ForAI (`/for-ai`)
 
